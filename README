@@ -1,5 +1,6 @@
 util-ironclad is a collection of system utilities for use with Ironclad, aimed
-to provide a similar solution to util-linux and procps-ng.
+to provide a similar solution to other system tools like util-linux, procps-ng,
+e2fsprogs, and others.
 
 These utilities are provided in a single-executable format in order to save
 executable space. Each utility will be a simlink to the global one.

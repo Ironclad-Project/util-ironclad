@@ -23,10 +23,16 @@
 #include <math.h>
 #include <entrypoints.h>
 
+#define SC_PAGESIZE      1
+#define SC_AVPHYS_PAGES  4
+#define SC_PHYS_PAGES    5
+#define SC_TOTAL_PAGES   7
+
 int showmem_entrypoint(int argc, char *argv[]) {
-    int print_only_free  = 0;
-    int print_only_used  = 0;
-    int print_only_total = 0;
+    int print_only_free      = 0;
+    int print_only_used      = 0;
+    int print_only_available = 0;
+    int print_only_installed = 0;
 
     char c;
     while ((c = getopt (argc, argv, "hfut")) != -1) {
@@ -37,50 +43,62 @@ int showmem_entrypoint(int argc, char *argv[]) {
                 puts("Options:");
                 puts("-h              Print this help message");
                 puts("-v              Print version information");
-                puts("-f              Print only free memory (in MiB)");
-                puts("-u              Print only used memory (in MiB)");
-                puts("-t              Print only total memory (in MiB)");
+                puts("-f              Print free memory (in MiB)");
+                puts("-u              Print used memory (in MiB)");
+                puts("-t              Print available memory (in MiB)");
+                puts("-i              Print total installed memory (in MiB)");
                 puts("-v | --version  Display version information.");
                 return 0;
-            case 'f': print_only_free  = 1; break;
-            case 'u': print_only_used  = 1; break;
-            case 't': print_only_total = 1; break;
+            case 'f': print_only_free      = 1; break;
+            case 'u': print_only_used      = 1; break;
+            case 't': print_only_available = 1; break;
+            case 'i': print_only_installed = 1; break;
             default:
                 fprintf(stderr, "showmem: Unknown option '%c'\n", optopt);
                 return 1;
         }
     }
 
-    long page_size, free_pages, total_pages, ret, errno;
-    SYSCALL1(SYSCALL_SYSCONF, 1);
+    long page_size, free_pages, available_pages, total_pages, ret, errno;
+    SYSCALL1(SYSCALL_SYSCONF, SC_PAGESIZE);
     if (ret == -1) {
         return 1;
     } else {
         page_size = ret;
     }
-    SYSCALL1(SYSCALL_SYSCONF, 4);
+    SYSCALL1(SYSCALL_SYSCONF, SC_AVPHYS_PAGES);
     if (ret == -1) {
         return 1;
     } else {
         free_pages = ret;
     }
-    SYSCALL1(SYSCALL_SYSCONF, 5);
+    SYSCALL1(SYSCALL_SYSCONF, SC_PHYS_PAGES);
+    if (ret == -1) {
+        return 1;
+    } else {
+        available_pages = ret;
+    }
+    SYSCALL1(SYSCALL_SYSCONF, SC_TOTAL_PAGES);
     if (ret == -1) {
         return 1;
     } else {
         total_pages = ret;
     }
 
-    long free_mib  = (free_pages  * page_size) / 1000000;
-    long total_mib = (total_pages * page_size) / 1000000;
-    int width      = round(1 + log(total_mib) / log(10));
-    if (print_only_free)       { printf("%lu\n", free_mib);             }
-    else if (print_only_used)  { printf("%lu\n", total_mib - free_mib); }
-    else if (print_only_total) { printf("%lu\n", total_mib);            }
+    long free      = (free_pages      * page_size) / 1000000;
+    long available = (available_pages * page_size) / 1000000;
+    long total     = (total_pages     * page_size) / 1000000;
+    int width      = round(1 + log(total) / log(10));
+
+    if (print_only_free)           { printf("%lu\n", free);                 }
+    else if (print_only_used)      { printf("%lu\n", available - free);     }
+    else if (print_only_available) { printf("%lu\n", available);            }
+    else if (print_only_installed) { printf("%lu\n", total);                }
     else {
-        printf("Free physical memory:  %*luMiB\n", width, free_mib);
-        printf("Used physical memory:  %*luMiB\n", width, total_mib - free_mib);
-        printf("Total physical memory: %*luMiB\n", width, total_mib);
+        printf("Free physical memory:      %*luMiB\n", width, free);
+        printf("Used physical memory:      %*luMiB\n", width, available - free);
+        printf("Available physical memory: %*luMiB\n", width, available);
+        printf("Total physical memory:     %*luMiB\n", width, total);
     }
 
    return 0;

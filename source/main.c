@@ -21,6 +21,13 @@
 #include <unistd.h>
 #include <string.h>
 #include <entrypoints.h>
+#include <stdbool.h>
+
+static bool is_program(const char *invoked_name, size_t length, const char *program) {
+  size_t program_length = strlen(program);
+
+  return (length >= program_length) && !strcmp(invoked_name + (length - program_length), program);
+}
 
 int main(int argc, char *argv[]) {
     const char *invoked_name = argv[0];
@@ -38,13 +45,16 @@ int main(int argc, char *argv[]) {
     }
 
     // Dispatch to the utilities.
-    if (!strcmp(invoked_name, "cpuinfo")) {
+    size_t invoked_length = strlen(invoked_name);
+    if (is_program(invoked_name, invoked_length, "cpuinfo")) {
         return cpuinfo_entrypoint(argc, argv);
-    } else if (!strcmp(invoked_name, "mount")) {
+    } else if (is_program(invoked_name, invoked_length, "integrity")) {
+        return integrity_entrypoint(argc, argv);
+    } else if (is_program(invoked_name, invoked_length, "mount")) {
         return mount_entrypoint(argc, argv);
-    } else if (!strcmp(invoked_name, "showmem")) {
+    } else if (is_program(invoked_name, invoked_length, "showmem")) {
         return showmem_entrypoint(argc, argv);
-    } else if (!strcmp(invoked_name, "umount")) {
+    } else if (is_program(invoked_name, invoked_length, "umount")) {
         return umount_entrypoint(argc, argv);
     } else {
         puts("Hello! this is util-ironclad");
