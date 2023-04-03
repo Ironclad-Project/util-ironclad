@@ -130,9 +130,11 @@ install: all
 	$(INSTALL) -d '$(call SHESCAPE,$(DESTDIR)$(bindir))'
 	$(INSTALL_PROGRAM) $(OUTPUT) '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(LN_S) "$$(basename '$(OUTPUT)')" '$(call SHESCAPE,$(DESTDIR)$(bindir))/cpuinfo'
+	$(LN_S) "$$(basename '$(OUTPUT)')" '$(call SHESCAPE,$(DESTDIR)$(bindir))/execmac'
 	$(LN_S) "$$(basename '$(OUTPUT)')" '$(call SHESCAPE,$(DESTDIR)$(bindir))/integrity'
 	$(LN_S) "$$(basename '$(OUTPUT)')" '$(call SHESCAPE,$(DESTDIR)$(bindir))/mount'
 	$(LN_S) "$$(basename '$(OUTPUT)')" '$(call SHESCAPE,$(DESTDIR)$(bindir))/showmem'
+	$(LN_S) "$$(basename '$(OUTPUT)')" '$(call SHESCAPE,$(DESTDIR)$(bindir))/strace'
 	$(LN_S) "$$(basename '$(OUTPUT)')" '$(call SHESCAPE,$(DESTDIR)$(bindir))/umount'
 
 # Install and strip executables.

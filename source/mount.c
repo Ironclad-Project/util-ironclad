@@ -60,7 +60,7 @@ int mount_entrypoint(int argc, char *argv[]) {
     }
 
 END_WHILE:
-    for(; optind < argc; optind++){ 
+    for(; optind < argc; optind++){
         if (source == NULL) {
             source = strdup(argv[optind]);
             if (source == NULL) {
@@ -80,7 +80,7 @@ END_WHILE:
         fputs("mount: No source was specified\n", stderr);
         return 1;
     }
-    
+
     if (target == NULL) {
         fputs("mount: No target was specified\n", stderr);
         return 1;

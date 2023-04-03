@@ -23,10 +23,12 @@
 #include <entrypoints.h>
 #include <stdbool.h>
 
-static bool is_program(const char *invoked_name, size_t length, const char *program) {
+static bool is_program(const char *invoked_name, size_t length,
+                       const char *program) {
   size_t program_length = strlen(program);
 
-  return (length >= program_length) && !strcmp(invoked_name + (length - program_length), program);
+  return (length >= program_length) &&
+         !strcmp(invoked_name + (length - program_length), program);
 }
 
 int main(int argc, char *argv[]) {
@@ -48,20 +50,24 @@ int main(int argc, char *argv[]) {
     size_t invoked_length = strlen(invoked_name);
     if (is_program(invoked_name, invoked_length, "cpuinfo")) {
         return cpuinfo_entrypoint(argc, argv);
+    } else if (is_program(invoked_name, invoked_length, "execmac")) {
+        return execmac_entrypoint(argc, argv);
     } else if (is_program(invoked_name, invoked_length, "integrity")) {
         return integrity_entrypoint(argc, argv);
     } else if (is_program(invoked_name, invoked_length, "mount")) {
         return mount_entrypoint(argc, argv);
     } else if (is_program(invoked_name, invoked_length, "showmem")) {
         return showmem_entrypoint(argc, argv);
+    } else if (is_program(invoked_name, invoked_length, "strace")) {
+        return strace_entrypoint(argc, argv);
     } else if (is_program(invoked_name, invoked_length, "umount")) {
         return umount_entrypoint(argc, argv);
     } else {
         puts("Hello! this is util-ironclad");
-        puts("util-ironclad provides some system utilities in a single-executable");
+        puts("util-ironclad provides some utilities in a single-executable");
         puts("format in order to save executable space. Each utility is a");
         puts("symlink to the global one. The implemented utilities are:");
-        puts("mount showmem umount");
+        puts("cpuinfo execmac integrity mount showmem umount");
         return 0;
     }
 }
