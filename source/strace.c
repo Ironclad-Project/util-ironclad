@@ -32,6 +32,7 @@
 #include <sched.h>
 #include <sys/wait.h>
 #include <inttypes.h>
+#include <poll.h>
 
 struct registers {
     uint64_t rax;
@@ -103,6 +104,14 @@ static void print_syscall(FILE *out, struct registers state) {
                     state.rdi, state.rsi, state.rdx, state.rcx, state.r8,
                     state.r9);
             break;
+        case SYSCALL_CLONE:
+            fprintf(out, "clone(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)\n",
+                    state.rdi, state.rsi, state.rdx, state.rcx, state.r8);
+            break;
+        case SYSCALL_WAIT:
+            fprintf(out, "wait(0x%lx, 0x%lx, 0x%lx)\n",
+                    state.rdi, state.rsi, state.rdx);
+            break;
         case SYSCALL_IOCTL:
             fprintf(out, "ioctl(0x%lx, 0x%lx, 0x%lx)\n", state.rdi, state.rsi,
                     state.rdx);
@@ -111,8 +120,14 @@ static void print_syscall(FILE *out, struct registers state) {
             fprintf(out, "getdents(0x%lx, 0x%lx, 0x%lx)\n", state.rdi,
                     state.rsi, state.rdx);
             break;
+        case SYSCALL_STAT:
+            fprintf(out, "stat(0x%lx, 0x%lx)\n", state.rdi, state.rsi);
+            break;
         case SYSCALL_SCHED_YIELD:
             fprintf(out, "sched_yield()\n");
+            break;
+        case SYSCALL_PIPE:
+            fprintf(out, "pipe(0x%lx, 0x%lx)\n", state.rdi, state.rsi);
             break;
         default:
             fprintf(out, "(%lu)(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)\n",
@@ -182,10 +197,25 @@ END_WHILE:
         return 1;
     }
 
+    // Poll for data to translate and print.
+    // We also close our writer end so we get POLLHUP when the pipe is broken
+    // (process closed), else we can potentially loop forever!
+    close(pipes[1]);
+    struct pollfd polled = {
+        .fd      = pipes[0],
+        .events  = POLLIN,
+        .revents = 0
+    };
     while (true) {
-        ssize_t count = read(pipes[0], &state, sizeof(state));
-        if (count == sizeof(state)) {
-            print_syscall(out, state);
+        ret = poll(&polled, 1, -1);
+        if (ret == -1) {
+           perror("strace: Could not poll");
+           return 1;
+        }
+        if (polled.revents & POLLIN) {
+           if (read(pipes[0], &state, sizeof(state)) == sizeof(state)) {
+               print_syscall(out, state);
+           }
         }
         if (waitpid(child, &status, WNOHANG) == child) {
             break;
