@@ -133,7 +133,10 @@ install: all
 	$(LN_S) "$$(basename '$(OUTPUT)')" '$(call SHESCAPE,$(DESTDIR)$(bindir))/execmac'
 	$(LN_S) "$$(basename '$(OUTPUT)')" '$(call SHESCAPE,$(DESTDIR)$(bindir))/integrity'
 	$(LN_S) "$$(basename '$(OUTPUT)')" '$(call SHESCAPE,$(DESTDIR)$(bindir))/mount'
+	$(LN_S) "$$(basename '$(OUTPUT)')" '$(call SHESCAPE,$(DESTDIR)$(bindir))/ps'
 	$(LN_S) "$$(basename '$(OUTPUT)')" '$(call SHESCAPE,$(DESTDIR)$(bindir))/showmem'
+	$(LN_S) "$$(basename '$(OUTPUT)')" '$(call SHESCAPE,$(DESTDIR)$(bindir))/login'
+	$(LN_S) "$$(basename '$(OUTPUT)')" '$(call SHESCAPE,$(DESTDIR)$(bindir))/su'
 	$(LN_S) "$$(basename '$(OUTPUT)')" '$(call SHESCAPE,$(DESTDIR)$(bindir))/strace'
 	$(LN_S) "$$(basename '$(OUTPUT)')" '$(call SHESCAPE,$(DESTDIR)$(bindir))/umount'
 

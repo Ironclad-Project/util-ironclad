@@ -20,10 +20,21 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdint.h>
 #include <sys/syscall.h>
 #include <math.h>
 #include <sys/mount.h>
 #include <entrypoints.h>
+
+#define SC_LIST_MOUNTS 9
+struct mountinfo {
+    uint32_t type;
+    uint32_t flags;
+    char     source[20];
+    uint32_t source_length;
+    char     location[20];
+    uint32_t location_length;
+};
 
 int mount_entrypoint(int argc, char *argv[]) {
     char *source = NULL;
@@ -76,12 +87,31 @@ END_WHILE:
         }
     }
 
-    if (source == NULL) {
+    if (source == NULL && target == NULL) {
+        long ret, errno;
+        struct mountinfo *buffer = malloc(5 * sizeof(struct mountinfo));
+        SYSCALL3(SYSCALL_SYSCONF, SC_LIST_MOUNTS, buffer, 5 * sizeof(struct mountinfo));
+        if (ret == -1) {
+           return 1;
+        } else if (ret > 5) {
+            return 1;
+        }
+
+        for (int i = 0; i < ret; i++) {
+            printf("%.*s on %.*s type ", buffer[i].source_length,
+                   buffer[i].source, buffer[i].location_length,
+                   buffer[i].location);
+            if (buffer[i].type == 1) {
+                printf("ext\n");
+            } else {
+                printf("fat\n");
+            }
+        }
+        return 0;
+    } else if (source == NULL) {
         fputs("mount: No source was specified\n", stderr);
         return 1;
-    }
-
-    if (target == NULL) {
+    } else if (target == NULL) {
         fputs("mount: No target was specified\n", stderr);
         return 1;
     }

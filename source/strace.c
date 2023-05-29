@@ -64,40 +64,40 @@ static void print_syscall(FILE *out, struct registers state) {
             fprintf(out, "exit(0x%lx)\n", state.rdi);
             break;
         case SYSCALL_ARCH_PRCTL:
-            fprintf(out, "arch_prctl(0x%lx, 0x%lx)\n", state.rdi, state.rsi);
+            fprintf(out, "arch_prctl(0x%lx, 0x%lx)", state.rdi, state.rsi);
             break;
         case SYSCALL_OPEN:
-            fprintf(out, "open(0x%lx, 0x%lx, 0x%lx, 0x%lx)\n", state.rdi,
+            fprintf(out, "open(0x%lx, 0x%lx, 0x%lx, 0x%lx)", state.rdi,
                     state.rsi, state.rdx, state.rcx);
             break;
         case SYSCALL_CLOSE:
-            fprintf(out, "close(0x%lx)\n", state.rdi);
+            fprintf(out, "close(0x%lx)", state.rdi);
             break;
         case SYSCALL_READ:
-            fprintf(out, "read(0x%lx, 0x%lx, 0x%lx)\n", state.rdi, state.rsi,
+            fprintf(out, "read(0x%lx, 0x%lx, 0x%lx)", state.rdi, state.rsi,
                     state.rdx);
             break;
         case SYSCALL_WRITE:
-            fprintf(out, "write(0x%lx, 0x%lx, 0x%lx)\n", state.rdi, state.rsi,
+            fprintf(out, "write(0x%lx, 0x%lx, 0x%lx)", state.rdi, state.rsi,
                     state.rdx);
             break;
         case SYSCALL_SEEK:
-            fprintf(out, "seek(0x%lx, 0x%lx, 0x%lx)\n", state.rdi, state.rsi,
+            fprintf(out, "seek(0x%lx, 0x%lx, 0x%lx)", state.rdi, state.rsi,
                     state.rdx);
             break;
         case SYSCALL_MMAP:
-            fprintf(out, "mmap(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)\n",
+            fprintf(out, "mmap(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)",
                     state.rdi, state.rsi, state.rdx, state.rcx, state.r8,
                     state.r9);
             break;
         case SYSCALL_MUNMAP:
-            fprintf(out, "munmap(0x%lx, 0x%lx)\n", state.rdi, state.rsi);
+            fprintf(out, "munmap(0x%lx, 0x%lx)", state.rdi, state.rsi);
             break;
         case SYSCALL_GETPID:
-            fprintf(out, "getpid()\n");
+            fprintf(out, "getpid()");
             break;
         case SYSCALL_GETPPID:
-            fprintf(out, "getppid()\n");
+            fprintf(out, "getppid()");
             break;
         case SYSCALL_EXEC:
             fprintf(out, "exec(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)\n",
@@ -105,35 +105,47 @@ static void print_syscall(FILE *out, struct registers state) {
                     state.r9);
             break;
         case SYSCALL_CLONE:
-            fprintf(out, "clone(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)\n",
+            fprintf(out, "clone(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)",
                     state.rdi, state.rsi, state.rdx, state.rcx, state.r8);
             break;
         case SYSCALL_WAIT:
-            fprintf(out, "wait(0x%lx, 0x%lx, 0x%lx)\n",
+            fprintf(out, "wait(0x%lx, 0x%lx, 0x%lx)",
                     state.rdi, state.rsi, state.rdx);
             break;
         case SYSCALL_IOCTL:
-            fprintf(out, "ioctl(0x%lx, 0x%lx, 0x%lx)\n", state.rdi, state.rsi,
+            fprintf(out, "ioctl(0x%lx, 0x%lx, 0x%lx)", state.rdi, state.rsi,
                     state.rdx);
             break;
         case SYSCALL_GETDENTS:
-            fprintf(out, "getdents(0x%lx, 0x%lx, 0x%lx)\n", state.rdi,
+            fprintf(out, "getdents(0x%lx, 0x%lx, 0x%lx)", state.rdi,
                     state.rsi, state.rdx);
             break;
         case SYSCALL_STAT:
-            fprintf(out, "stat(0x%lx, 0x%lx)\n", state.rdi, state.rsi);
+            fprintf(out, "stat(0x%lx, 0x%lx)", state.rdi, state.rsi);
             break;
         case SYSCALL_SCHED_YIELD:
-            fprintf(out, "sched_yield()\n");
+            fprintf(out, "sched_yield()");
             break;
         case SYSCALL_PIPE:
-            fprintf(out, "pipe(0x%lx, 0x%lx)\n", state.rdi, state.rsi);
+            fprintf(out, "pipe(0x%lx, 0x%lx)", state.rdi, state.rsi);
+            break;
+        case SYSCALL_UNLINK:
+            fprintf(out, "unlink(0x%lx, 0x%lx, 0x%lx)", state.rdi, state.rsi,
+                         state.rdx);
             break;
         default:
-            fprintf(out, "(%lu)(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)\n",
+            fprintf(out, "(%lu)(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)",
                     state.rax, state.rdi, state.rsi, state.rdx, state.rcx,
                     state.r8, state.r9);
             break;
+    }
+}
+
+static void print_error(FILE *out, struct registers state) {
+    if (state.rdx) {
+       fprintf(out, " = 0x%lx (%lu)\n", state.rax, state.rdx);
+    } else {
+       fprintf(out, " = 0x%lx\n", state.rax);
     }
 }
 
@@ -206,6 +218,7 @@ END_WHILE:
         .events  = POLLIN,
         .revents = 0
     };
+    bool is_syscall = true;
     while (true) {
         ret = poll(&polled, 1, -1);
         if (ret == -1) {
@@ -214,7 +227,16 @@ END_WHILE:
         }
         if (polled.revents & POLLIN) {
            if (read(pipes[0], &state, sizeof(state)) == sizeof(state)) {
-               print_syscall(out, state);
+               if (is_syscall == true) {
+                   print_syscall(out, state);
+                   is_syscall = state.rax == SYSCALL_EXIT        ||
+                                state.rax == SYSCALL_EXIT_THREAD ||
+                                state.rax == SYSCALL_EXEC;
+               } else {
+                   print_error(out, state);
+                   is_syscall = true;
+               }
+
            }
         }
         if (waitpid(child, &status, WNOHANG) == child) {

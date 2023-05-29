@@ -56,12 +56,18 @@ int main(int argc, char *argv[]) {
         return integrity_entrypoint(argc, argv);
     } else if (is_program(invoked_name, invoked_length, "mount")) {
         return mount_entrypoint(argc, argv);
+    } else if (is_program(invoked_name, invoked_length, "ps")) {
+        return ps_entrypoint(argc, argv);
     } else if (is_program(invoked_name, invoked_length, "showmem")) {
         return showmem_entrypoint(argc, argv);
     } else if (is_program(invoked_name, invoked_length, "strace")) {
         return strace_entrypoint(argc, argv);
     } else if (is_program(invoked_name, invoked_length, "umount")) {
         return umount_entrypoint(argc, argv);
+    }  else if (is_program(invoked_name, invoked_length, "login")) {
+        return login_entrypoint(argc, argv);
+    } else if (is_program(invoked_name, invoked_length, "su")) {
+        return su_entrypoint(argc, argv);
     } else {
         puts("Hello! this is util-ironclad");
         puts("util-ironclad provides some utilities in a single-executable");

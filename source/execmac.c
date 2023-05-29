@@ -19,17 +19,15 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <unistd.h>
-#include <sys/ironclad_mac.h>
+#include <sys/mac.h>
 #include <string.h>
 #include <sys/wait.h>
 
 int execmac_entrypoint(int argc, char *argv[]) {
     char    *capability;
-    uint64_t translated_caps;
-    size_t filt_len;
-    struct mac_filter filt;
+    uint64_t translated_caps = get_mac_capabilities();
 
-    int c;
+    int c, ret;
     while ((c = getopt(argc, argv, "hc:f:")) != -1) {
         switch (c) {
             case 'h':
@@ -53,6 +51,9 @@ int execmac_entrypoint(int argc, char *argv[]) {
                 puts("sysnet:  Can configure networking system-wide.");
                 puts("mnt:     Can mount/unmount.");
                 puts("pwr:     Can modify power levels and reboot/shutdown.");
+                puts("ptrace:  Can use ptrace to trace children.");
+                puts("setuid:  Can change the effective and real UID.");
+                puts("mac:     Can modify MAC permissions and enforcement");
                 puts("all:     Use all capabilities, must be passed alone.");
                 return 0;
             case 'c':
@@ -81,6 +82,12 @@ int execmac_entrypoint(int argc, char *argv[]) {
                         translated_caps |= MAC_CAP_SYS_MNT;
                     } else if (!strncmp(capability, "pwr", 3)) {
                         translated_caps |= MAC_CAP_SYS_PWR;
+                    } else if (!strncmp(capability, "ptrace", 6)) {
+                        translated_caps |= MAC_CAP_PTRACE;
+                    } else if (!strncmp(capability, "setuid", 6)) {
+                        translated_caps |= MAC_CAP_SETUID;
+                    } else if (!strncmp(capability, "mac", 3)) {
+                        translated_caps |= MAC_CAP_SYS_MAC;
                     } else {
                         fputs("execmac: bad cap", stderr);
                         return 1;
@@ -89,14 +96,13 @@ int execmac_entrypoint(int argc, char *argv[]) {
                 }
                 break;
             case 'f':
-                filt_len = strlen(optarg);
-                if (filt_len > 75) {
-                    fputs("execmac: Filter path > 75", stderr);
+                if (!strncmp(optarg, "/dev/", 5)) {
+                    ret = add_mac_permissions(optarg + 5, 0b1011111);
+                } else {
+                    ret = add_mac_permissions(optarg, 0b11111);
                 }
-                strcpy(filt.path, optarg);
-                filt.length = filt_len;
-                filt.perms  = (uint8_t)-1;
-                if (add_mac_filter(&filt)) {
+
+                if (ret) {
                     perror("execmac: Could not set file filter");
                     return 1;
                 }
@@ -120,11 +126,6 @@ END_WHILE:
             return 1;
         }
 
-        if (lock_mac()) {
-            perror("execmac: Could not lock MAC");
-            return 1;
-        }
-
         if (execvp(argv[optind], argv + optind)) {
             perror("execmac: Could not launch program");
             return 1;
@@ -132,8 +133,7 @@ END_WHILE:
     }
 
     int status;
-    pid_t success = waitpid(child, &status, 0);
-    if (success == -1) {
+    if (waitpid(child, &status, 0) == -1) {
         perror("execmac: Could not wait for child");
         return 1;
     } else {
