@@ -35,20 +35,21 @@ int login_entrypoint(int argc, char *argv[]) {
     }
     puts("");
 
-    printf("\nusername: ");
-    fflush(stdout);
-    scanf("%s", user);
-    fflush(stdout);
+    while (1) {
+        printf("\nusername: ");
+        fflush(stdout);
+        scanf("%s", user);
+        fflush(stdout);
 
-    pwd = getpwnam(user);
-    if (pwd == NULL) {
-        perror("login: did not find login name");
-        return 1;
+        pwd = getpwnam(user);
+        if (pwd == NULL) {
+            puts("login: did not find login name");
+        } else {
+            setuid(pwd->pw_uid);
+            seteuid(pwd->pw_uid);
+            setenv("HOME", pwd->pw_dir, 1);
+            execl(pwd->pw_shell, pwd->pw_shell, "--login", NULL);
+            return 1;
+        }
     }
-
-    setuid(pwd->pw_uid);
-    seteuid(pwd->pw_uid);
-    setenv("HOME", pwd->pw_dir, 1);
-    execl(pwd->pw_shell, pwd->pw_shell, "--login", NULL);
-    return 1;
 }
