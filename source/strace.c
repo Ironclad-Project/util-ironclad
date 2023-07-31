@@ -1,5 +1,5 @@
 /*
-    integrity.c: Setup and configure Ironclad's integrity system.
+    strace.c: Syscall tracing using ptrace for children processes.
     Copyright (C) 2023 streaksu
 
     This program is free software: you can redistribute it and/or modify

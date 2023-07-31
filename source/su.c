@@ -44,8 +44,13 @@ int su_entrypoint(int argc, char *argv[]) {
         }
     }
 
-    struct passwd *pwd = user != NULL ? getpwnam(user) : getpwnam("root");
+    if (user == NULL) {
+       user = "root";
+    }
+
+    struct passwd *pwd = getpwnam(user);
     if (pwd == NULL) {
+        fprintf(stderr, "su: user '%s' does not exist or the user entry is malformed\n", user);
         return 1;
     }
 
@@ -53,6 +58,7 @@ int su_entrypoint(int argc, char *argv[]) {
     seteuid(pwd->pw_uid);
 
     if (do_login_shell) {
+        setenv("HOME", pwd->pw_dir, 1);
         execl(pwd->pw_shell, pwd->pw_shell, "--login", NULL);
     } else {
         execl(pwd->pw_shell, pwd->pw_shell, NULL);

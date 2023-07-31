@@ -33,10 +33,33 @@ struct procinfo {
     uint16_t id_len;
     uint16_t ppid;
     uint16_t pid;
+    uint32_t uid;
     uint32_t flags;
 } __attribute__((packed));
 
 int ps_entrypoint(int argc, char *argv[]) {
+    int print_all_users = 0;
+    int print_running   = 0;
+    char c;
+    while ((c = getopt (argc, argv, "hAr")) != -1) {
+        switch (c) {
+            case 'h':
+                puts("Usage: ps [options]");
+                puts("");
+                puts("Options:");
+                puts("-h             Print this help message");
+                puts("-A             Print all processes regardless of user");
+                puts("-r             Print running ones only");
+                puts("-v | --version Display version information.");
+                return 0;
+            case 'A': print_all_users = 1; break;
+            case 'r': print_running   = 1; break;
+            default:
+                fprintf(stderr, "ps: Unknown option '%c'\n", optopt);
+                return 1;
+        }
+    }
+
     struct procinfo *buffer = malloc(50 * sizeof(struct procinfo));
 
     long ret, errno;
@@ -46,6 +69,8 @@ int ps_entrypoint(int argc, char *argv[]) {
     } else if (ret > 50) {
         return 1;
     }
+
+    uid_t current_uid = getuid();
 
     printf("%4s %4s %11s %20s\n", "PPID", "PID", "STAT", "CMD");
     for (int i = 0; i < ret; i++) {
@@ -60,8 +85,11 @@ int ps_entrypoint(int argc, char *argv[]) {
             flags_message[5] = 'x';
             flags_message[6] = 'd';
         }
-        printf("%4d %4d %11s %20.*s\n", buffer[i].ppid, buffer[i].pid,
-               flags_message, buffer[i].id_len, buffer[i].id);
+        if ((print_all_users || buffer[i].uid == current_uid) &&
+            (!print_running || (buffer[i].flags & PROC_EXITED) == 0)) {
+            printf("%4d %4d %11s %20.*s\n", buffer[i].ppid, buffer[i].pid,
+                   flags_message, buffer[i].id_len, buffer[i].id);
+        }
     }
 
    return 0;

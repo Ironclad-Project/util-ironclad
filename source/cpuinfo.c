@@ -79,7 +79,7 @@ int cpuinfo_entrypoint(int argc, char *argv[]) {
     } else if (only_cores) {
        printf("%d\n", logical_cores);
     } else if (only_freq) {
-       printf("%dGHz\n", frequency);
+       printf("%d GHz\n", frequency);
     }
     return 0;
 }

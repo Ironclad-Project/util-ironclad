@@ -52,8 +52,6 @@ int main(int argc, char *argv[]) {
         return cpuinfo_entrypoint(argc, argv);
     } else if (is_program(invoked_name, invoked_length, "execmac")) {
         return execmac_entrypoint(argc, argv);
-    } else if (is_program(invoked_name, invoked_length, "integrity")) {
-        return integrity_entrypoint(argc, argv);
     } else if (is_program(invoked_name, invoked_length, "mount")) {
         return mount_entrypoint(argc, argv);
     } else if (is_program(invoked_name, invoked_length, "ps")) {

@@ -42,7 +42,6 @@ int showmem_entrypoint(int argc, char *argv[]) {
                 puts("");
                 puts("Options:");
                 puts("-h              Print this help message");
-                puts("-v              Print version information");
                 puts("-f              Print free memory (in MiB)");
                 puts("-u              Print used memory (in MiB)");
                 puts("-t              Print available memory (in MiB)");
