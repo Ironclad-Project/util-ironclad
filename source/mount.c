@@ -123,14 +123,13 @@ END_WHILE:
             ret = mount(source, target, "fat32", 0, NULL);
         }
     } else {
-        ret = mount(source, target, type, 0, NULL) != -1;
+        ret = mount(source, target, type, 0, NULL);
     }
 
     if (ret < 0) {
         perror("mount: Could not mount");
+        return 1;
+    } else {
+        return 0;
     }
-    free(source);
-    free(target);
-    free(type);
-    return ret;
 }

@@ -48,6 +48,7 @@ int login_entrypoint(int argc, char *argv[]) {
             setuid(pwd->pw_uid);
             seteuid(pwd->pw_uid);
             setenv("HOME", pwd->pw_dir, 1);
+            chdir(pwd->pw_dir);
             execl(pwd->pw_shell, pwd->pw_shell, "--login", NULL);
             return 1;
         }

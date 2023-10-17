@@ -52,6 +52,8 @@ int main(int argc, char *argv[]) {
         return cpuinfo_entrypoint(argc, argv);
     } else if (is_program(invoked_name, invoked_length, "execmac")) {
         return execmac_entrypoint(argc, argv);
+    } else if (is_program(invoked_name, invoked_length, "ifconfig")) {
+        return ifconfig_entrypoint(argc, argv);
     } else if (is_program(invoked_name, invoked_length, "mount")) {
         return mount_entrypoint(argc, argv);
     } else if (is_program(invoked_name, invoked_length, "ps")) {
@@ -60,6 +62,8 @@ int main(int argc, char *argv[]) {
         return showmem_entrypoint(argc, argv);
     } else if (is_program(invoked_name, invoked_length, "strace")) {
         return strace_entrypoint(argc, argv);
+    } else if (is_program(invoked_name, invoked_length, "uptime")) {
+        return uptime_entrypoint(argc, argv);
     } else if (is_program(invoked_name, invoked_length, "umount")) {
         return umount_entrypoint(argc, argv);
     }  else if (is_program(invoked_name, invoked_length, "login")) {
