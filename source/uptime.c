@@ -22,20 +22,21 @@
 #include <unistd.h>
 
 int uptime_entrypoint(int argc, char *argv[]) {
-    int print_only_free      = 0;
-    int print_only_used      = 0;
-    int print_only_available = 0;
-    int print_only_installed = 0;
+    int print_seconds = 0;
 
     char c;
-    while ((c = getopt (argc, argv, "h")) != -1) {
+    while ((c = getopt (argc, argv, "hs")) != -1) {
         switch (c) {
             case 'h':
                 puts("Usage: uptime [options]");
                 puts("");
                 puts("Options:");
                 puts("-h              Print this help message");
+                puts("-s              Display only the uptime epoch seconds");
                 puts("-v | --version  Display version information.");
+            case 's':
+                print_seconds = 1;
+                break;
             default:
                 fprintf(stderr, "uptime: Unknown option '%c'\n", optopt);
                 return 1;
@@ -43,7 +44,14 @@ int uptime_entrypoint(int argc, char *argv[]) {
     }
 
     struct timespec tp;
-    clock_gettime(CLOCK_REALTIME, &tp);
+
+    if (print_seconds) {
+        clock_gettime(CLOCK_MONOTONIC, &tp);
+        printf("%llu\n", tp.tv_sec);
+        return 0;
+    } else {
+        clock_gettime(CLOCK_REALTIME, &tp);
+    }
 
     char time_str[80];
     time_t epoch = tp.tv_sec;
