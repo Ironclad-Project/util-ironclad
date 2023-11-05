@@ -389,7 +389,7 @@ END_WHILE:
 
     SYSCALL4(SYSCALL_PTRACE, 1, child, 0, pipes[1]);
     if (ret) {
-        perror("strace: Could not do ptrace");
+        fprintf(stderr, "strace: Could not do ptrace: %s\n", strerror(errno));
         return 1;
     }
 

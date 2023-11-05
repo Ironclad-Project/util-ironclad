@@ -50,6 +50,8 @@ int main(int argc, char *argv[]) {
     size_t invoked_length = strlen(invoked_name);
     if (is_program(invoked_name, invoked_length, "cpuinfo")) {
         return cpuinfo_entrypoint(argc, argv);
+    } else if (is_program(invoked_name, invoked_length, "klog")) {
+        return klog_entrypoint(argc, argv);
     } else if (is_program(invoked_name, invoked_length, "execmac")) {
         return execmac_entrypoint(argc, argv);
     } else if (is_program(invoked_name, invoked_length, "ifconfig")) {

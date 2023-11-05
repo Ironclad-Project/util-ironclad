@@ -19,6 +19,7 @@
 #pragma once
 
 int cpuinfo_entrypoint(int argc, char *argv[]);
+int klog_entrypoint(int argc, char *argv[]);
 int execmac_entrypoint(int argc, char *argv[]);
 int ifconfig_entrypoint(int argc, char *argv[]);
 int mount_entrypoint(int argc, char *argv[]);

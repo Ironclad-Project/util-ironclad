@@ -28,7 +28,7 @@ int execmac_entrypoint(int argc, char *argv[]) {
     uint64_t translated_caps = get_mac_capabilities();
 
     int c, ret;
-    while ((c = getopt(argc, argv, "hc:f:")) != -1) {
+    while ((c = getopt(argc, argv, "hc:f:p:")) != -1) {
         switch (c) {
             case 'h':
                 puts("Usage: execmac [options] [command]");
@@ -36,6 +36,7 @@ int execmac_entrypoint(int argc, char *argv[]) {
                 puts("Options:");
                 puts("-h            Print this help message");
                 puts("-v|--version  Print version information");
+                puts("-p            Policy to use, can be D, S, K");
                 puts("-c            Capabilities to give the command");
                 puts("-f            Add a file filter");
                 puts("");
@@ -54,6 +55,8 @@ int execmac_entrypoint(int argc, char *argv[]) {
                 puts("ptrace:  Can use ptrace to trace children.");
                 puts("setuid:  Can change the effective and real UID.");
                 puts("mac:     Can modify MAC permissions and enforcement");
+                puts("clock:   Can access clock resources");
+                puts("killall: Can kill and signal to all processes");
                 puts("all:     Use all capabilities, must be passed alone.");
                 return 0;
             case 'c':
@@ -88,6 +91,10 @@ int execmac_entrypoint(int argc, char *argv[]) {
                         translated_caps |= MAC_CAP_SETUID;
                     } else if (!strncmp(capability, "mac", 3)) {
                         translated_caps |= MAC_CAP_SYS_MAC;
+                    } else if (!strncmp(capability, "clock", 5)) {
+                        translated_caps |= MAC_CAP_CLOCK;
+                    } else if (!strncmp(capability, "killall", 7)) {
+                        translated_caps |= MAC_CAP_SIGNALALL;
                     } else {
                         fputs("execmac: bad cap", stderr);
                         return 1;
@@ -107,8 +114,20 @@ int execmac_entrypoint(int argc, char *argv[]) {
                     return 1;
                 }
                 break;
+            case 'p':
+                if (!strncmp(optarg, "D", 1)) {
+                    set_mac_enforcement(MAC_DENY);
+                } else if (!strncmp(optarg, "S", 1)) {
+                    set_mac_enforcement(MAC_DENY_AND_SCREAM);
+                } else if (!strncmp(optarg, "K", 1)) {
+                    set_mac_enforcement(MAC_KILL);
+                } else {
+                    perror("execmac: Invalid policy");
+                    return 1;
+                }
+                break;
             default:
-                if (optopt == 'c' || optopt == 'f') {
+                if (optopt == 'c' || optopt == 'f' || optopt == 'p') {
                     fprintf(stderr, "execmac: %c needs an argument\n", optopt);
                     return 1;
                 } else {

@@ -140,6 +140,7 @@ install: all
 	$(LN_S) "$$(basename '$(OUTPUT)')" '$(call SHESCAPE,$(DESTDIR)$(bindir))/su'
 	$(LN_S) "$$(basename '$(OUTPUT)')" '$(call SHESCAPE,$(DESTDIR)$(bindir))/strace'
 	$(LN_S) "$$(basename '$(OUTPUT)')" '$(call SHESCAPE,$(DESTDIR)$(bindir))/umount'
+	$(LN_S) "$$(basename '$(OUTPUT)')" '$(call SHESCAPE,$(DESTDIR)$(bindir))/klog'
 
 # Install and strip executables.
 .PHONY: install-strip
