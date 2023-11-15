@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <unistd.h>
-#include <entrypoints.h>
+#include <commons.h>
 #include <pwd.h>
 #include <string.h>
 #include <sys/reboot.h>
@@ -68,13 +68,13 @@ static void print_ipv6addr(uint8_t *addr) {
     }
 }
 
-int ifconfig_entrypoint(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
     int do_block = 0;
     int do_unblock = 0;
     char *blocked = NULL;
 
     char c;
-    while ((c = getopt(argc, argv, "hb:u:")) != -1) {
+    while ((c = getopt(argc, argv, "hb:u:v")) != -1) {
         switch (c) {
             case 'h':
                 puts("Usage: ifconfig");
@@ -83,7 +83,7 @@ int ifconfig_entrypoint(int argc, char *argv[]) {
                 puts("-h              Print this help message");
                 puts("-b <name>       Block the passed interface");
                 puts("-u <name>       Unblock the passed interface");
-                puts("-v | --version  Display version information.");
+                puts("-v              Display version information.");
                 return 0;
             case 'b':
                 do_block = 1;
@@ -93,6 +93,9 @@ int ifconfig_entrypoint(int argc, char *argv[]) {
                 do_unblock = 1;
                 blocked = strdup(optarg);
                 break;
+            case 'v':
+               puts("ifconfig" VERSION_STR);
+               return 0;
             default:
                 if (optopt == 'b') {
                     fprintf(stderr, "ifconfig: %c needs an argument\n", optopt);

@@ -1,5 +1,5 @@
 /*
-    entrypoints.h: Entrypoints of all subprograms.
+    commons.h: Common things between programs.
     Copyright (C) 2023 streaksu
 
     This program is free software: you can redistribute it and/or modify
@@ -18,15 +18,9 @@
 
 #pragma once
 
-int cpuinfo_entrypoint(int argc, char *argv[]);
-int klog_entrypoint(int argc, char *argv[]);
-int execmac_entrypoint(int argc, char *argv[]);
-int ifconfig_entrypoint(int argc, char *argv[]);
-int mount_entrypoint(int argc, char *argv[]);
-int ps_entrypoint(int argc, char *argv[]);
-int showmem_entrypoint(int argc, char *argv[]);
-int strace_entrypoint(int argc, char *argv[]);
-int uptime_entrypoint(int argc, char *argv[]);
-int login_entrypoint(int argc, char *argv[]);
-int su_entrypoint(int argc, char *argv[]);
-int umount_entrypoint(int argc, char *argv[]);
+#define VERSION_STR                                                       \
+   " provided by util-ironclad " PACKAGE_VERSION "\n"                     \
+   "Copyright (C) 2023 streaksu.\n"                                       \
+   "License under the GNU GPL <https://gnu.org/licenses/gpl.html>.\n"     \
+   "This is free software: you are free to change and redistribute it.\n" \
+   "There is NO WARRANTY, to the extent permitted by law."

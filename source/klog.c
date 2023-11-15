@@ -21,26 +21,29 @@
 #include <unistd.h>
 #include <sys/syscall.h>
 #include <math.h>
-#include <entrypoints.h>
+#include <commons.h>
 
 #define SC_DUMPLOGS 15
 
-int klog_entrypoint(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
     int print_only_free      = 0;
     int print_only_used      = 0;
     int print_only_available = 0;
     int print_only_installed = 0;
 
     char c;
-    while ((c = getopt (argc, argv, "h")) != -1) {
+    while ((c = getopt (argc, argv, "hv")) != -1) {
         switch (c) {
             case 'h':
                 puts("Usage: klog [options]");
                 puts("");
                 puts("Options:");
                 puts("-h              Print this help message");
-                puts("-v | --version  Display version information.");
+                puts("-v              Display version information.");
                 return 0;
+            case 'v':
+               puts("klog" VERSION_STR);
+               return 0;
             default:
                 fprintf(stderr, "klog: Unknown option '%c'\n", optopt);
                 return 1;

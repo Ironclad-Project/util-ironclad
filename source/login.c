@@ -19,10 +19,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <entrypoints.h>
 #include <pwd.h>
 
-int login_entrypoint(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
     (void)argc;
     (void)argv;
 

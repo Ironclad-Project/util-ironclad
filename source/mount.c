@@ -24,7 +24,7 @@
 #include <sys/syscall.h>
 #include <math.h>
 #include <sys/mount.h>
-#include <entrypoints.h>
+#include <commons.h>
 
 #define SC_LIST_MOUNTS 9
 struct mountinfo {
@@ -36,13 +36,13 @@ struct mountinfo {
     uint32_t location_length;
 };
 
-int mount_entrypoint(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
     char *source = NULL;
     char *target = NULL;
     char *type   = NULL;
 
     char c;
-    while ((c = getopt (argc, argv, "ht:")) != -1) {
+    while ((c = getopt (argc, argv, "hvt:")) != -1) {
         switch (c) {
             case 'h':
                 puts("Usage: mount [options] <source> <target>");
@@ -51,7 +51,7 @@ int mount_entrypoint(int argc, char *argv[]) {
                 puts("-h              Print this help message");
                 puts("-v              Print version information");
                 puts("-t <type>       FS to mount, if not present, a guess will be made");
-                puts("-v | --version  Display version information.");
+                puts("-v              Display version information.");
                 return 0;
             case 't':
                 type = strdup(optarg);
@@ -59,6 +59,9 @@ int mount_entrypoint(int argc, char *argv[]) {
                     return 1;
                 }
                 break;
+            case 'v':
+               puts("mount" VERSION_STR);
+               return 0;
             default:
                 if (optopt == 't') {
                     fputs("mount: Option -t requires an argument\n", stderr);

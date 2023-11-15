@@ -21,21 +21,21 @@
 #include <unistd.h>
 #include <sys/syscall.h>
 #include <math.h>
-#include <entrypoints.h>
+#include <commons.h>
 
 #define SC_PAGESIZE      1
 #define SC_AVPHYS_PAGES  4
 #define SC_PHYS_PAGES    5
 #define SC_TOTAL_PAGES   7
 
-int showmem_entrypoint(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
     int print_only_free      = 0;
     int print_only_used      = 0;
     int print_only_available = 0;
     int print_only_installed = 0;
 
     char c;
-    while ((c = getopt (argc, argv, "hfut")) != -1) {
+    while ((c = getopt (argc, argv, "hfutv")) != -1) {
         switch (c) {
             case 'h':
                 puts("Usage: showmem [options]");
@@ -46,12 +46,15 @@ int showmem_entrypoint(int argc, char *argv[]) {
                 puts("-u              Print used memory (in MiB)");
                 puts("-t              Print available memory (in MiB)");
                 puts("-i              Print total installed memory (in MiB)");
-                puts("-v | --version  Display version information.");
+                puts("-v              Display version information.");
                 return 0;
             case 'f': print_only_free      = 1; break;
             case 'u': print_only_used      = 1; break;
             case 't': print_only_available = 1; break;
             case 'i': print_only_installed = 1; break;
+            case 'v':
+               puts("showmem" VERSION_STR);
+               return 0;
             default:
                 fprintf(stderr, "showmem: Unknown option '%c'\n", optopt);
                 return 1;

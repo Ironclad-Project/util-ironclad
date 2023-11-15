@@ -20,12 +20,13 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <commons.h>
 
-int uptime_entrypoint(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
     int print_seconds = 0;
 
     char c;
-    while ((c = getopt (argc, argv, "hs")) != -1) {
+    while ((c = getopt (argc, argv, "hsv")) != -1) {
         switch (c) {
             case 'h':
                 puts("Usage: uptime [options]");
@@ -33,10 +34,13 @@ int uptime_entrypoint(int argc, char *argv[]) {
                 puts("Options:");
                 puts("-h              Print this help message");
                 puts("-s              Display only the uptime epoch seconds");
-                puts("-v | --version  Display version information.");
+                puts("-v              Display version information.");
             case 's':
                 print_seconds = 1;
                 break;
+            case 'v':
+               puts("uptime" VERSION_STR);
+               return 0;
             default:
                 fprintf(stderr, "uptime: Unknown option '%c'\n", optopt);
                 return 1;

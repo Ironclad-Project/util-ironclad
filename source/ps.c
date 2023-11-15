@@ -22,7 +22,7 @@
 #include <unistd.h>
 #include <sys/syscall.h>
 #include <math.h>
-#include <entrypoints.h>
+#include <commons.h>
 
 #define SC_LIST_PROCS   8
 #define SC_LIST_THREADS 12
@@ -55,13 +55,13 @@ struct tclusterinfo {
     uint16_t tcquantum;
 } __attribute__((packed));
 
-int ps_entrypoint(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
     int print_all_users = 0;
     int print_threads   = 0;
     int print_clusters  = 0;
     int print_running   = 0;
     char c;
-    while ((c = getopt (argc, argv, "hATCr")) != -1) {
+    while ((c = getopt (argc, argv, "hATCrv")) != -1) {
         switch (c) {
             case 'h':
                 puts("Usage: ps [options]");
@@ -72,12 +72,15 @@ int ps_entrypoint(int argc, char *argv[]) {
                 puts("-T             Print threads instead of processes");
                 puts("-C             Print thread clusters instead of processes");
                 puts("-r             Print running ones only");
-                puts("-v | --version Display version information.");
+                puts("-v             Display version information.");
                 return 0;
             case 'A': print_all_users = 1; break;
             case 'T': print_threads   = 1; break;
             case 'C': print_clusters  = 1; break;
             case 'r': print_running   = 1; break;
+            case 'v':
+               puts("ps" VERSION_STR);
+               return 0;
             default:
                 fprintf(stderr, "ps: Unknown option '%c'\n", optopt);
                 return 1;

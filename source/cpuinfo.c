@@ -23,18 +23,18 @@
 #include <sys/syscall.h>
 #include <math.h>
 #include <sys/mount.h>
-#include <entrypoints.h>
+#include <commons.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <cpuid.h>
 
-int cpuinfo_entrypoint(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
     bool only_name  = false;
     bool only_cores = false;
     bool only_freq  = false;
 
     char c;
-    while ((c = getopt (argc, argv, "hncf")) != -1) {
+    while ((c = getopt (argc, argv, "hncfv")) != -1) {
         switch (c) {
             case 'h':
                 puts("Usage: cpuinfo [options]");
@@ -44,11 +44,14 @@ int cpuinfo_entrypoint(int argc, char *argv[]) {
                 puts("-n              Display only the name of the CPU.");
                 puts("-c              Display only the count of cores.");
                 puts("-f              Display only the frequency of the CPU.");
-                puts("-v | --version  Display version information.");
+                puts("-v              Display version information.");
                 return 0;
             case 'n': only_name  = true; break;
             case 'c': only_cores = true; break;
             case 'f': only_freq  = true; break;
+            case 'v':
+               puts("cpuinfo" VERSION_STR);
+               return 0;
             default:
                 fputs("cpuinfo: Unrecognized option\n", stderr);
                 return 1;

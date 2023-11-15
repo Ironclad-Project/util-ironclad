@@ -19,22 +19,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <entrypoints.h>
+#include <commons.h>
 #include <pwd.h>
 #include <string.h>
 #include <sys/reboot.h>
 
-int su_entrypoint(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
     int do_login_shell = 0;
     char *user = NULL;
 
     for (int i = 1; i < argc; i++) {
-        if (!strcmp(argv[i], "-h")) {
+        if (!strcmp(argv[i], "-hv")) {
             puts("Usage: su [options] [-] [username]");
             puts("");
             puts("Options:");
             puts("-h              Print this help message");
-            puts("-v | --version  Display version information.");
+            puts("-v              Display version information.");
+            return 0;
+        } else if (!strcmp(argv[i], "-v")) {
+            puts("su" VERSION_STR);
             return 0;
         } else if (!strcmp(argv[i], "-")) {
             do_login_shell = 1;

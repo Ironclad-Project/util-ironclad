@@ -22,20 +22,21 @@
 #include <sys/mac.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <commons.h>
 
-int execmac_entrypoint(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
     char    *capability;
     uint64_t translated_caps = get_mac_capabilities();
 
     int c, ret;
-    while ((c = getopt(argc, argv, "hc:f:p:")) != -1) {
+    while ((c = getopt(argc, argv, "hvc:f:p:")) != -1) {
         switch (c) {
             case 'h':
                 puts("Usage: execmac [options] [command]");
                 puts("");
                 puts("Options:");
                 puts("-h            Print this help message");
-                puts("-v|--version  Print version information");
+                puts("-v            Print version information");
                 puts("-p            Policy to use, can be D, S, K");
                 puts("-c            Capabilities to give the command");
                 puts("-f            Add a file filter");
@@ -59,6 +60,9 @@ int execmac_entrypoint(int argc, char *argv[]) {
                 puts("killall: Can kill and signal to all processes");
                 puts("all:     Use all capabilities, must be passed alone.");
                 return 0;
+            case 'v':
+               puts("execmac" VERSION_STR);
+               return 0;
             case 'c':
                 if (!strncmp(optarg, "all", 3)) {
                     translated_caps = (uint64_t)-1;

@@ -23,13 +23,13 @@
 #include <sys/syscall.h>
 #include <math.h>
 #include <sys/mount.h>
-#include <entrypoints.h>
+#include <commons.h>
 
-int umount_entrypoint(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
     int flags    = 0;
     char *target = NULL;
     char c;
-    while ((c = getopt (argc, argv, "hf")) != -1) {
+    while ((c = getopt (argc, argv, "hvf")) != -1) {
         switch (c) {
             case 'h':
                 puts("Usage: umount <target>");
@@ -38,18 +38,21 @@ int umount_entrypoint(int argc, char *argv[]) {
                 puts("-h              Print this help message");
                 puts("-v              Print version information");
                 puts("-f              Force unmounting, even if busy");
-                puts("-v | --version  Display version information.");
+                puts("-v              Display version information.");
                 return 0;
             case 'f':
                flags |= 1;
                break;
+            case 'v':
+               puts("umount" VERSION_STR);
+               return 0;
             default:
                 goto END_WHILE;
         }
     }
 
 END_WHILE:
-    for(; optind < argc; optind++){ 
+    for(; optind < argc; optind++){
         if (target == NULL) {
             target = strdup(argv[optind]);
             if (target == NULL) {
@@ -59,7 +62,7 @@ END_WHILE:
             fprintf(stderr, "umount: Argument '%s' not used\n", argv[optind]);
         }
     }
-    
+
     if (target == NULL) {
         fputs("umount: No target was specified\n", stderr);
         return 1;

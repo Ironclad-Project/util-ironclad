@@ -23,7 +23,7 @@
 #include <sys/syscall.h>
 #include <math.h>
 #include <sys/mount.h>
-#include <entrypoints.h>
+#include <commons.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <cpuid.h>
@@ -332,11 +332,11 @@ static void print_error(FILE *out, struct registers state) {
     }
 }
 
-int strace_entrypoint(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
     FILE *out = stderr;
 
     int c;
-    while ((c = getopt(argc, argv, "ho:")) != -1) {
+    while ((c = getopt(argc, argv, "hvo:")) != -1) {
         switch (c) {
             case 'h':
                 puts("Usage: strace [options] [command]");
@@ -357,6 +357,9 @@ int strace_entrypoint(int argc, char *argv[]) {
                     return 1;
                 }
                 break;
+            case 'v':
+               puts("strace" VERSION_STR);
+               return 0;
             default:
                 if (optopt == 'o') {
                     fprintf(stderr, "strace: %c needs an argument\n", optopt);
