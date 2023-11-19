@@ -20,6 +20,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <pwd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
 
 int main(int argc, char *argv[]) {
     (void)argc;
@@ -44,12 +47,31 @@ int main(int argc, char *argv[]) {
         if (pwd == NULL) {
             puts("login: did not find login name");
         } else {
-            setuid(pwd->pw_uid);
-            seteuid(pwd->pw_uid);
-            setenv("HOME", pwd->pw_dir, 1);
-            chdir(pwd->pw_dir);
-            execl(pwd->pw_shell, pwd->pw_shell, "--login", NULL);
-            return 1;
+            struct stat buf;
+            int fd = open("/etc/motd", O_RDONLY);
+            if (fd != -1) {
+                fstat(fd, &buf);
+                char *contents = malloc(buf.st_size);
+                read(fd, contents, buf.st_size);
+                write(0, contents, buf.st_size);
+                puts("");
+                free(contents);
+            }
+
+            int child = fork();
+            if (child == -1) {
+                perror("login: could not fork");
+                return 1;
+            } else if (child == 0) {
+                setuid(pwd->pw_uid);
+                seteuid(pwd->pw_uid);
+                setenv("HOME", pwd->pw_dir, 1);
+                chdir(pwd->pw_dir);
+                execl(pwd->pw_shell, pwd->pw_shell, "--login", NULL);
+                return 1;
+            } else {
+                waitpid(child, NULL, 0);
+            }
         }
     }
 }
