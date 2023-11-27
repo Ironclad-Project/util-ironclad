@@ -25,6 +25,7 @@
 #include <math.h>
 #include <sys/mount.h>
 #include <commons.h>
+#include <errno.h>
 
 #define SC_LIST_MOUNTS 9
 struct mountinfo {
@@ -34,15 +35,50 @@ struct mountinfo {
     uint32_t source_length;
     char     location[20];
     uint32_t location_length;
+    uint64_t blocksize;
+    uint64_t fragsize;
+    uint64_t sizeinfrags;
+    uint64_t freeblocks;
+    uint64_t freeblocksu;
+    uint64_t inodecount;
+    uint64_t freeinodes;
+    uint64_t freebinodesu;
+    uint64_t maxfile;
 };
+
+void update_mtab() {
+    long ret, errno;
+    struct mountinfo *buffer = malloc(5 * sizeof(struct mountinfo));
+    SYSCALL3(SYSCALL_SYSCONF, SC_LIST_MOUNTS, buffer, 5 * sizeof(struct mountinfo));
+    if (ret == -1 || ret > 5) {
+        return;
+    }
+
+    FILE *mtab = fopen("/etc/mtab", "w+");
+    if (mtab == NULL) {
+        perror("mount: could not open mtab");
+        return;
+    }
+    for (int i = 0; i < ret; i++) {
+        fprintf(mtab, "%s ", buffer[i].source);
+        fprintf(mtab, "%s ", buffer[i].location);
+        if (buffer[i].type == 1) {
+            fprintf(mtab, "ext2 ");
+        } else {
+            fprintf(mtab, "fat32 ");
+        }
+        fprintf(mtab, "default 0 0\n");
+    }
+}
 
 int main(int argc, char *argv[]) {
     char *source = NULL;
     char *target = NULL;
     char *type   = NULL;
+    int mount_fstab = 0;
 
     char c;
-    while ((c = getopt (argc, argv, "hvt:")) != -1) {
+    while ((c = getopt (argc, argv, "hvt:a")) != -1) {
         switch (c) {
             case 'h':
                 puts("Usage: mount [options] <source> <target>");
@@ -53,15 +89,18 @@ int main(int argc, char *argv[]) {
                 puts("-t <type>       FS to mount, if not present, a guess will be made");
                 puts("-v              Display version information.");
                 return 0;
+            case 'v':
+               puts("mount" VERSION_STR);
+               return 0;
             case 't':
                 type = strdup(optarg);
                 if (type == NULL) {
                     return 1;
                 }
                 break;
-            case 'v':
-               puts("mount" VERSION_STR);
-               return 0;
+            case 'a':
+                mount_fstab = 1;
+                break;
             default:
                 if (optopt == 't') {
                     fputs("mount: Option -t requires an argument\n", stderr);
@@ -88,6 +127,28 @@ END_WHILE:
         } else {
             fprintf(stderr, "mount: Argument '%s' not used\n", argv[optind]);
         }
+    }
+
+    if (mount_fstab) {
+        FILE *fstab = fopen("/etc/fstab", "r");
+        if (fstab == NULL) {
+            perror("mount: could not open fstab");
+            return 1;
+        }
+        rewind(fstab);
+
+        char buffer[150];
+        while (fgets(buffer, 150, fstab) != NULL) {
+            char source[30];
+            char target[30];
+            char fs[30];
+
+            if (sscanf(buffer, "%s %s %s\n", source, target, fs) != 3) {
+                break;
+            }
+            mount(source, target, fs, 0, NULL);
+        }
+        goto END;
     }
 
     if (source == NULL && target == NULL) {
@@ -132,7 +193,9 @@ END_WHILE:
     if (ret < 0) {
         perror("mount: Could not mount");
         return 1;
-    } else {
-        return 0;
     }
+
+END:
+    update_mtab();
+    return 0;
 }
