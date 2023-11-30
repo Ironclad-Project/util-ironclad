@@ -46,29 +46,104 @@ struct mountinfo {
     uint64_t maxfile;
 };
 
-void update_mtab() {
+int string_to_type(const char *type) {
+   if (!strncmp(type, "ext", 3) || !strncmp(type, "ext2", 4) ||
+       !strncmp(type, "ext3", 4) || !strncmp(type, "ext4", 4)) {
+      return MNT_EXT;
+   } else if (!strncmp(type, "fat", 3) || !strncmp(type, "fat12", 5) ||
+       !strncmp(type, "fat16", 5) || !strncmp(type, "fat32", 5)) {
+      return MNT_FAT;
+   } else {
+      return 0;
+   }
+}
+
+char *type_to_string(int type) {
+   switch (type) {
+      case MNT_EXT: return "ext";
+      case MNT_FAT: return "fat";
+      default: return NULL;
+   }
+}
+
+int update_mtab(void) {
     long ret, errno;
     struct mountinfo *buffer = malloc(5 * sizeof(struct mountinfo));
     SYSCALL3(SYSCALL_SYSCONF, SC_LIST_MOUNTS, buffer, 5 * sizeof(struct mountinfo));
     if (ret == -1 || ret > 5) {
-        return;
+        return 1;
     }
 
     FILE *mtab = fopen("/etc/mtab", "w+");
     if (mtab == NULL) {
         perror("mount: could not open mtab");
-        return;
+        return 1;
     }
     for (int i = 0; i < ret; i++) {
-        fprintf(mtab, "%s ", buffer[i].source);
-        fprintf(mtab, "%s ", buffer[i].location);
-        if (buffer[i].type == 1) {
-            fprintf(mtab, "ext2 ");
+        int already_did_one = 0;
+        fprintf(mtab, "%.*s ", buffer[i].source_length, buffer[i].source);
+        fprintf(mtab, "%.*s ", buffer[i].location_length, buffer[i].location);
+        fprintf(mtab, "%s ", type_to_string(buffer[i].type));
+        if (buffer[i].flags & MS_RDONLY) {
+            fprintf(mtab, "ro");
         } else {
-            fprintf(mtab, "fat32 ");
+            fprintf(mtab, "rw");
         }
-        fprintf(mtab, "default 0 0\n");
+        if (buffer[i].flags & MS_RELATIME) {
+            fprintf(mtab, ",relatime");
+        }
+        fprintf(mtab, " 0 0\n");
     }
+    fclose(mtab);
+    return 0;
+}
+
+int print_kernel_mounts(void) {
+    long ret, errno;
+    struct mountinfo *buffer = malloc(5 * sizeof(struct mountinfo));
+    SYSCALL3(SYSCALL_SYSCONF, SC_LIST_MOUNTS, buffer, 5 * sizeof(struct mountinfo));
+    if (ret == -1 || ret > 5) {
+        return 1;
+    }
+
+    for (int i = 0; i < ret; i++) {
+        printf("%.*s ", buffer[i].source_length, buffer[i].source);
+        printf("%.*s ", buffer[i].location_length, buffer[i].location);
+        printf("type %s ", type_to_string(buffer[i].type));
+        if (buffer[i].flags & MS_RDONLY) {
+            printf("ro");
+        } else {
+            printf("rw");
+        }
+        if (buffer[i].flags & MS_RELATIME) {
+            printf(",relatime");
+        }
+        printf("\n");
+    }
+    return 0;
+}
+
+int update_according_fstab(void) {
+    FILE *fstab = fopen("/etc/fstab", "r");
+    if (fstab == NULL) {
+        perror("mount: could not open fstab");
+        return 1;
+    }
+
+    char buffer[150];
+    while (fgets(buffer, 150, fstab) != NULL) {
+        char source[30];
+        char target[30];
+        char fs[30];
+
+        if (sscanf(buffer, "%s %s %s\n", source, target, fs) != 3) {
+            break;
+        }
+        mount(source, target, string_to_type(fs), 0);
+    }
+
+    fclose(fstab);
+    return 0;
 }
 
 int main(int argc, char *argv[]) {
@@ -76,18 +151,26 @@ int main(int argc, char *argv[]) {
     char *target = NULL;
     char *type   = NULL;
     int mount_fstab = 0;
+    int flags = 0;
 
     char c;
-    while ((c = getopt (argc, argv, "hvt:a")) != -1) {
+    char *tok;
+    while ((c = getopt (argc, argv, "hvt:af:")) != -1) {
         switch (c) {
             case 'h':
-                puts("Usage: mount [options] <source> <target>");
+                puts("Usage: mount [options] <source> [<target>]");
                 puts("");
                 puts("Options:");
-                puts("-h              Print this help message");
-                puts("-v              Print version information");
-                puts("-t <type>       FS to mount, if not present, a guess will be made");
-                puts("-v              Display version information.");
+                puts("-h         Print this help message");
+                puts("-v         Print version information");
+                puts("-t <type>  FS to mount, or else, try them all!");
+                puts("-a         Synchronize mounts according to fstab");
+                puts("-f <flags> Flags to mount with");
+                puts("");
+                puts("Available comma-separated flags:");
+                puts("remount   Instead of mounting, remount <source>");
+                puts("ro        Mount read-only, if not present, read-write");
+                puts("relatime  Use relative timestamps");
                 return 0;
             case 'v':
                puts("mount" VERSION_STR);
@@ -100,6 +183,22 @@ int main(int argc, char *argv[]) {
                 break;
             case 'a':
                 mount_fstab = 1;
+                break;
+            case 'f':
+                tok = strtok(optarg, ",");
+                while (tok != NULL) {
+                    if (!strncmp(tok, "remount", 7)) {
+                        flags |= MS_REMOUNT;
+                    } else if (!strncmp(tok, "ro", 2)) {
+                        flags |= MS_RDONLY;
+                    } else if (!strncmp(tok, "relatime", 8)) {
+                        flags |= MS_RELATIME;
+                    } else {
+                        fputs("mount: unrecognized flag", stderr);
+                        return 1;
+                    }
+                    tok = strtok(NULL, ",");
+                }
                 break;
             default:
                 if (optopt == 't') {
@@ -129,73 +228,37 @@ END_WHILE:
         }
     }
 
+    int ret;
     if (mount_fstab) {
-        FILE *fstab = fopen("/etc/fstab", "r");
-        if (fstab == NULL) {
-            perror("mount: could not open fstab");
-            return 1;
-        }
-        rewind(fstab);
-
-        char buffer[150];
-        while (fgets(buffer, 150, fstab) != NULL) {
-            char source[30];
-            char target[30];
-            char fs[30];
-
-            if (sscanf(buffer, "%s %s %s\n", source, target, fs) != 3) {
-                break;
-            }
-            mount(source, target, fs, 0, NULL);
-        }
-        goto END;
-    }
-
-    if (source == NULL && target == NULL) {
-        long ret, errno;
-        struct mountinfo *buffer = malloc(5 * sizeof(struct mountinfo));
-        SYSCALL3(SYSCALL_SYSCONF, SC_LIST_MOUNTS, buffer, 5 * sizeof(struct mountinfo));
-        if (ret == -1) {
-           return 1;
-        } else if (ret > 5) {
-            return 1;
-        }
-
-        for (int i = 0; i < ret; i++) {
-            printf("%.*s on %.*s type ", buffer[i].source_length,
-                   buffer[i].source, buffer[i].location_length,
-                   buffer[i].location);
-            if (buffer[i].type == 1) {
-                printf("ext\n");
-            } else {
-                printf("fat\n");
-            }
-        }
-        return 0;
+        ret = update_according_fstab();
+    } else if (source == NULL && target == NULL) {
+        return print_kernel_mounts();
     } else if (source == NULL) {
         fputs("mount: No source was specified\n", stderr);
         return 1;
     } else if (target == NULL) {
-        fputs("mount: No target was specified\n", stderr);
-        return 1;
-    }
-
-    int ret;
-    if (type == NULL) {
-        ret = mount(source, target, "ext", 0, NULL);
-        if (ret < 0) {
-            ret = mount(source, target, "fat32", 0, NULL);
+        if (flags & MS_REMOUNT) {
+            ret = mount("", source, 0, flags);
+        } else {
+           fputs("mount: No target was specified\n", stderr);
+           return 1;
         }
     } else {
-        ret = mount(source, target, type, 0, NULL);
+        if (type == NULL) {
+            ret = mount(source, target, MNT_EXT, flags);
+            if (ret != 0) {
+              ret = mount(source, target, MNT_FAT, flags);
+            }
+        } else {
+            ret = mount(source, target, string_to_type(type), 0);
+        }
     }
 
-    if (ret < 0) {
+    if (ret) {
         perror("mount: Could not mount");
         return 1;
     }
 
-END:
     update_mtab();
     return 0;
 }

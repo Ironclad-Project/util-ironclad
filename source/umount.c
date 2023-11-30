@@ -68,7 +68,7 @@ END_WHILE:
         return 1;
     }
 
-    int ret = umount2(target, flags);
+    int ret = umount(target, flags);
     if (ret == -1) {
         perror("umount: Could not unmount");
     }

@@ -76,8 +76,9 @@ override CPPFLAGS := \
 
 # Targets.
 .PHONY: all
-all: bin/cpuinfo bin/execmac bin/ifconfig bin/klog bin/login bin/mount bin/ps \
-	bin/showmem bin/strace bin/su bin/umount bin/uptime
+all: bin/cpuinfo bin/execmac bin/ifconfig bin/klog bin/login bin/lp \
+	bin/mount bin/newgrp bin/ps bin/renice bin/showmem bin/strace \
+	bin/su bin/umount bin/uptime
 
 bin/cpuinfo:
 	$(MKDIR_P) bin
@@ -99,13 +100,25 @@ bin/login:
 	$(MKDIR_P) bin
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(call MKESCAPE,$(SRCDIR))/source/login.c $(LIBS) -o $@
 
+bin/lp:
+	$(MKDIR_P) bin
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(call MKESCAPE,$(SRCDIR))/source/lp.c $(LIBS) -o $@
+
 bin/mount:
 	$(MKDIR_P) bin
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(call MKESCAPE,$(SRCDIR))/source/mount.c $(LIBS) -o $@
 
+bin/newgrp:
+	$(MKDIR_P) bin
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(call MKESCAPE,$(SRCDIR))/source/newgrp.c $(LIBS) -o $@
+
 bin/ps:
 	$(MKDIR_P) bin
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(call MKESCAPE,$(SRCDIR))/source/ps.c $(LIBS) -o $@
+
+bin/renice:
+	$(MKDIR_P) bin
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(call MKESCAPE,$(SRCDIR))/source/renice.c $(LIBS) -o $@
 
 bin/showmem:
 	$(MKDIR_P) bin
@@ -170,8 +183,11 @@ install: all
 	$(INSTALL_PROGRAM) bin/ifconfig '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/klog '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/login '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
+	$(INSTALL_PROGRAM) bin/lp '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/mount '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
+	$(INSTALL_PROGRAM) bin/newgrp '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/ps '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
+	$(INSTALL_PROGRAM) bin/renice '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/showmem '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/strace '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/su '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
@@ -186,8 +202,11 @@ install-strip: install
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/ifconfig
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/klog
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/login
+	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/lp
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/mount
+	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/newgrp
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/ps
+	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/renice
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/showmem
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/strace
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/su
@@ -202,8 +221,11 @@ uninstall:
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/ifconfig
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/klog
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/login
+	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/lp
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/mount
+	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/newgrp
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/ps
+	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/renice
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/showmem
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/strace
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/su
