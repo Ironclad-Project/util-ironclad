@@ -23,6 +23,8 @@
 #include <sys/syscall.h>
 #include <math.h>
 #include <commons.h>
+#include <inttypes.h>
+#include <string.h>
 
 #define SC_LIST_PROCS   8
 #define SC_LIST_THREADS 12
@@ -45,6 +47,7 @@ struct procinfo {
 
 struct threadinfo {
     uint16_t tid;
+    int16_t  niceness;
     uint16_t tcid;
     uint16_t pid;
 } __attribute__((packed));
@@ -55,32 +58,70 @@ struct tclusterinfo {
     uint16_t tcquantum;
 } __attribute__((packed));
 
+static void print_process_list_header(void) {
+    printf("%4s %4s %11s %20s\n", "PPID", "PID", "STAT", "CMD");
+}
+
+static void print_process_list_process(struct procinfo *proc) {
+    char flags_message[] = "xxx-xxx";
+    if (proc->flags & PROC_IS_TRACED) {
+        flags_message[0] = 't';
+        flags_message[1] = 'r';
+        flags_message[2] = 'a';
+    }
+    if (proc->flags & PROC_EXITED) {
+        flags_message[4] = 'e';
+        flags_message[5] = 'x';
+        flags_message[6] = 'd';
+    }
+    printf("%4d %4d %11s %20.*s\n", proc->ppid, proc->pid, flags_message,
+        proc->id_len, proc->id);
+}
+
 int main(int argc, char *argv[]) {
     int print_all_users = 0;
     int print_threads   = 0;
     int print_clusters  = 0;
     int print_running   = 0;
+    int print_only_this = 0;
+    int print_only_this_name = 0;
+    int print_only_this_parent = 0;
+
     char c;
-    while ((c = getopt (argc, argv, "hATCrv")) != -1) {
+    while ((c = getopt (argc, argv, "hvATCrp:o:")) != -1) {
         switch (c) {
             case 'h':
                 puts("Usage: ps [options]");
                 puts("");
                 puts("Options:");
-                puts("-h             Print this help message");
-                puts("-A             Print all processes regardless of user");
-                puts("-T             Print threads instead of processes");
-                puts("-C             Print thread clusters instead of processes");
-                puts("-r             Print running ones only");
-                puts("-v             Display version information.");
+                puts("-h          Print this help message");
+                puts("-v          Display version information.");
+                puts("-A          Print all processes regardless of user and filters");
+                puts("-T          Print threads instead of processes");
+                puts("-C          Print thread clusters instead of processes");
+                puts("-r          Print running ones only");
+                puts("-p <pid>    Only print information of the passed PID");
+                puts("-o <format> Format of process information output");
                 return 0;
+            case 'v':
+               puts("ps" VERSION_STR);
+               return 0;
             case 'A': print_all_users = 1; break;
             case 'T': print_threads   = 1; break;
             case 'C': print_clusters  = 1; break;
             case 'r': print_running   = 1; break;
-            case 'v':
-               puts("ps" VERSION_STR);
-               return 0;
+            case 'p':
+                if (sscanf(optarg, "%d", &print_only_this) != 1) {
+                    fprintf(stderr, "ps: '%s' is not a valid PID", optarg);
+                }
+                break;
+            case 'o':
+                if (!strncmp(optarg, "comm", 4)) {
+                    print_only_this_name = 1;
+                } else if (!strncmp(optarg, "ppid", 4)) {
+                    print_only_this_parent = 1;
+                }
+                break;
             default:
                 fprintf(stderr, "ps: Unknown option '%c'\n", optopt);
                 return 1;
@@ -107,7 +148,7 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 
-        printf("%4s %4s %4s %20s\n", "TID", "TCID", "PID", "CMD");
+        printf("%4s %4s %4s %4s %20s\n", "TID", "NICE", "TCID", "PID", "CMD");
         for (int i = 0; i < ret2; i++) {
             int found_idx = 0;
             for (int j = 0; j < ret; j++) {
@@ -116,7 +157,7 @@ int main(int argc, char *argv[]) {
                     break;
                 }
             }
-            printf("%4d %4d ", buffer[i].tid, buffer[i].tcid);
+            printf("%4d %4" PRId16 " %4d", buffer[i].tid, buffer[i].niceness, buffer[i].tcid);
             printf("%4d %20.*s\n", buffer[i].pid,
                buffer2[found_idx].id_len, buffer2[found_idx].id);
         }
@@ -157,25 +198,29 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 
-        uid_t current_uid = getuid();
+        if (print_only_this) {
+            for (int i = 0; i < ret; i++) {
+                if (buffer[i].pid == print_only_this) {
+                    if (print_only_this_name) {
+                        printf("%.*s\n", buffer[i].id_len, buffer[i].id);
+                    } else if (print_only_this_parent) {
+                        printf("%d\n", buffer[i].ppid);
+                    } else {
+                        print_process_list_header();
+                        print_process_list_process(&buffer[i]);
+                    }
+                    break;
+                }
+            }
+        } else {
+            uid_t current_uid = getuid();
 
-        printf("%4s %4s %11s %20s\n", "PPID", "PID", "STAT", "CMD");
-        for (int i = 0; i < ret; i++) {
-            char flags_message[] = "xxx-xxx";
-            if (buffer[i].flags & PROC_IS_TRACED) {
-                flags_message[0] = 't';
-                flags_message[1] = 'r';
-                flags_message[2] = 'a';
-            }
-            if (buffer[i].flags & PROC_EXITED) {
-                flags_message[4] = 'e';
-                flags_message[5] = 'x';
-                flags_message[6] = 'd';
-            }
-            if ((print_all_users || buffer[i].uid == current_uid) &&
-                (!print_running || (buffer[i].flags & PROC_EXITED) == 0)) {
-                printf("%4d %4d %11s %20.*s\n", buffer[i].ppid, buffer[i].pid,
-                       flags_message, buffer[i].id_len, buffer[i].id);
+            print_process_list_header();
+            for (int i = 0; i < ret; i++) {
+                if ((print_all_users || buffer[i].uid == current_uid) &&
+                    (!print_running || (buffer[i].flags & PROC_EXITED) == 0)) {
+                    print_process_list_process(&buffer[i]);
+                }
             }
         }
     }

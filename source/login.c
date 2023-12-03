@@ -23,6 +23,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <grp.h>
 
 int main(int argc, char *argv[]) {
     (void)argc;
@@ -64,7 +65,7 @@ int main(int argc, char *argv[]) {
                 return 1;
             } else if (child == 0) {
                 setuid(pwd->pw_uid);
-                seteuid(pwd->pw_uid);
+                setgid(pwd->pw_gid);
                 setenv("HOME", pwd->pw_dir, 1);
                 chdir(pwd->pw_dir);
                 execl(pwd->pw_shell, pwd->pw_shell, "--login", NULL);
