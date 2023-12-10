@@ -76,7 +76,7 @@ override CPPFLAGS := \
 
 # Targets.
 .PHONY: all
-all: bin/cpuinfo bin/execmac bin/ifconfig bin/klog bin/login bin/lp \
+all: bin/cpuinfo bin/execmac bin/ifconfig bin/klog bin/login bin/lp bin/lslocks \
 	bin/mount bin/newgrp bin/ps bin/renice bin/showmem bin/strace \
 	bin/su bin/umount bin/uptime
 
@@ -103,6 +103,10 @@ bin/login:
 bin/lp:
 	$(MKDIR_P) bin
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(call MKESCAPE,$(SRCDIR))/source/lp.c $(LIBS) -o $@
+
+bin/lslocks:
+	$(MKDIR_P) bin
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(call MKESCAPE,$(SRCDIR))/source/lslocks.c $(LIBS) -o $@
 
 bin/mount:
 	$(MKDIR_P) bin
@@ -184,6 +188,7 @@ install: all
 	$(INSTALL_PROGRAM) bin/klog '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/login '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/lp '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
+	$(INSTALL_PROGRAM) bin/lslocks '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/mount '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/newgrp '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/ps '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
@@ -203,6 +208,7 @@ install-strip: install
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/klog
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/login
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/lp
+	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/lslocks
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/mount
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/newgrp
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/ps
@@ -222,6 +228,7 @@ uninstall:
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/klog
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/login
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/lp
+	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/lslocks
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/mount
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/newgrp
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/ps
