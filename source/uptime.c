@@ -18,9 +18,12 @@
 
 #include <time.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <commons.h>
+#include <utmpx.h>
+#include <string.h>
 
 int main(int argc, char *argv[]) {
     int print_seconds = 0;
@@ -85,16 +88,25 @@ int main(int argc, char *argv[]) {
         tp.tv_sec %= 3600;
     }
 
-    uint64_t minutes = tp.tv_sec / 60;
-    if (minutes != 0) {
-        printf("%d minute", minutes);
-         if (minutes > 1) {
-            printf("s");
+    printf("%d:%.2d, ", tp.tv_sec / 60, tp.tv_sec % 60);
+
+    struct utmpx *u;
+    int count = 0;
+    setutxent();
+    while ((u = getutxent()) != NULL) {
+        if (u->ut_type == USER_PROCESS) {
+            count++;
         }
-        printf(", ");
-        tp.tv_sec %= 60;
+    }
+    endutxent();
+    if (count != 1) {
+        printf("%d users, ", count);
+    } else {
+        printf("1 user, ");
     }
 
-    printf("%d seconds\n", tp.tv_sec);
+    double loads[3];
+    getloadavg(loads, 3);
+    printf("load average: %.4f, %.4f, %.4f\n");
     return 0;
 }
