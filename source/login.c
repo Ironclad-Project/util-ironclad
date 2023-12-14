@@ -24,6 +24,8 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <grp.h>
+#include <utmpx.h>
+#include <string.h>
 
 int main(int argc, char *argv[]) {
     (void)argc;
@@ -64,6 +66,15 @@ int main(int argc, char *argv[]) {
                 perror("login: could not fork");
                 return 1;
             } else if (child == 0) {
+                struct utmpx entry;
+                entry.ut_type = USER_PROCESS;
+                strcpy(entry.ut_user, pwd->pw_name);
+                setutxent();
+                if (pututxline(&entry) == NULL) {
+                    perror("login: could not log login");
+                }
+                endutxent();
+
                 setuid(pwd->pw_uid);
                 setgid(pwd->pw_gid);
                 setenv("HOME", pwd->pw_dir, 1);
