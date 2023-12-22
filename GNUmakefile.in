@@ -76,8 +76,8 @@ override CPPFLAGS := \
 
 # Targets.
 .PHONY: all
-all: bin/cpuinfo bin/execmac bin/ifconfig bin/klog bin/login bin/lp bin/lslocks \
-	bin/mount bin/newgrp bin/ps bin/renice bin/showmem bin/strace \
+all: bin/cpuinfo bin/execmac bin/ifconfig bin/klog bin/logger bin/login bin/lp \
+	bin/lslocks bin/mount bin/newgrp bin/ps bin/renice bin/showmem bin/strace \
 	bin/su bin/umount bin/uptime
 
 bin/cpuinfo:
@@ -95,6 +95,10 @@ bin/ifconfig:
 bin/klog:
 	$(MKDIR_P) bin
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(call MKESCAPE,$(SRCDIR))/source/klog.c $(LIBS) -o $@
+
+bin/logger:
+	$(MKDIR_P) bin
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(call MKESCAPE,$(SRCDIR))/source/logger.c $(LIBS) -o $@
 
 bin/login:
 	$(MKDIR_P) bin
@@ -186,6 +190,7 @@ install: all
 	$(INSTALL_PROGRAM) bin/execmac '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/ifconfig '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/klog '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
+	$(INSTALL_PROGRAM) bin/logger '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/login '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/lp '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/lslocks '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
@@ -206,6 +211,7 @@ install-strip: install
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/execmac
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/ifconfig
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/klog
+	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/logger
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/login
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/lp
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/lslocks
@@ -226,6 +232,7 @@ uninstall:
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/execmac
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/ifconfig
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/klog
+	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/logger
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/login
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/lp
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/lslocks
