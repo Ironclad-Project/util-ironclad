@@ -107,6 +107,6 @@ int main(int argc, char *argv[]) {
 
     double loads[3];
     getloadavg(loads, 3);
-    printf("load average: %.4f, %.4f, %.4f\n");
+    printf("load average: %.4lf, %.4lf, %.4lf\n", loads[0], loads[1], loads[2]);
     return 0;
 }
