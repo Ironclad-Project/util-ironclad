@@ -80,7 +80,6 @@ int update_mtab(void) {
         return 1;
     }
     for (int i = 0; i < ret; i++) {
-        int already_did_one = 0;
         fprintf(mtab, "%.*s ", buffer[i].source_length, buffer[i].source);
         fprintf(mtab, "%.*s ", buffer[i].location_length, buffer[i].location);
         fprintf(mtab, "%s ", type_to_string(buffer[i].type));

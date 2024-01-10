@@ -27,6 +27,7 @@
 #include <sys/syscall.h>
 #include <stdbool.h>
 #include <fcntl.h>
+#include <inttypes.h>
 
 #define SC_LIST_FILELOCKS 18
 #define MODE_WRITE 0b1
@@ -55,7 +56,7 @@ int main(int argc, char *argv[]) {
                puts("lslocks" VERSION_STR);
                return 0;
             default:
-                fprintf(stderr, "lslocks: %c is not a valid argument\n");
+                fprintf(stderr, "lslocks: %c is not a valid argument\n", optopt);
                 return 1;
         }
     }
@@ -69,7 +70,7 @@ int main(int argc, char *argv[]) {
 
     printf("%4s %4s %20s %20s %10s %10s\n", "PID", "MODE", "START", "LENGTH", "FS", "INO");
     for (int i = 0; i < ret; i++) {
-        printf("%4llu %4s %20llu %20llu %10llu %10llu\n",
+        printf("%4" PRIu32 " %4s %20" PRIu64 " %20" PRIu64 " %10" PRIu64 " %10" PRIu64 "\n",
                buffer[i].pid, buffer[i].mode == MODE_WRITE ? "W" : "R",
                buffer[i].start, buffer[i].length, buffer[i].fs, buffer[i].ino);
     }

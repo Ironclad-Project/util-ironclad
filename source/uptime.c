@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
 
     if (print_seconds) {
         clock_gettime(CLOCK_MONOTONIC, &tp);
-        printf("%llu\n", tp.tv_sec);
+        printf("%lu\n", tp.tv_sec);
         return 0;
     } else {
         clock_gettime(CLOCK_REALTIME, &tp);
@@ -63,14 +63,14 @@ int main(int argc, char *argv[]) {
     char time_str[80];
     time_t epoch = tp.tv_sec;
     struct tm *tm = localtime(&epoch);
-    size_t time_str_len = strftime(time_str, 80, "%T up", tm);
+    strftime(time_str, 80, "%T up", tm);
     printf(" %s ", time_str);
 
     clock_gettime(CLOCK_MONOTONIC, &tp);
 
     uint64_t days = tp.tv_sec / 86400;
     if (days != 0) {
-        printf("%d day", days);
+        printf("%ld day", days);
         if (days > 1) {
             printf("s");
         }
@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
 
     uint64_t hours = tp.tv_sec / 3600;
     if (hours != 0) {
-        printf("%d hour", hours);
+        printf("%ld hour", hours);
          if (hours > 1) {
             printf("s");
         }
@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
         tp.tv_sec %= 3600;
     }
 
-    printf("%d:%.2d, ", tp.tv_sec / 60, tp.tv_sec % 60);
+    printf("%ld:%.2ld, ", tp.tv_sec / 60, tp.tv_sec % 60);
 
     struct utmpx *u;
     int count = 0;

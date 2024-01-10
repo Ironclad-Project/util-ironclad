@@ -29,6 +29,7 @@
 #include <fcntl.h>
 #include <time.h>
 #include <termios.h>
+#include <sys/ioctl.h>
 
 int main(int argc, char *argv[]) {
     char c;

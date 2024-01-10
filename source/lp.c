@@ -101,9 +101,9 @@ END_WHILE:
        size_t title_len = strlen(title);
        size_t max_length = OUTPUT_WIDTH - timestr_len - MIN_DATE_SEPARATION;
        if (title_len > max_length) {
-          fprintf(dest, "%.*s...   ", max_length - 3, title);
+          fprintf(dest, "%.*s...   ", (unsigned int)max_length - 3, title);
        } else {
-          fprintf(dest, "%-*s   ", max_length, title);
+          fprintf(dest, "%-*s   ", (unsigned int)max_length, title);
        }
 
        fprintf(dest, "%s\n", timestr);

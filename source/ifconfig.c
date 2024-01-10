@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
                 if (optopt == 'b') {
                     fprintf(stderr, "ifconfig: %c needs an argument\n", optopt);
                 } else {
-                    fprintf(stderr, "ifconfig: %c is not a valid argument\n");
+                    fprintf(stderr, "ifconfig: %c is not a valid argument\n", optopt);
                 }
                 return 1;
         }
@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
     }
 
     struct netinterface *buffer = malloc(10 * sizeof(struct netinterface));
-    long page_size, free_pages, available_pages, total_pages, ret, errno;
+    long ret, errno;
     SYSCALL3(SYSCALL_SYSCONF, SC_LIST_NETINTER, buffer, 10 * sizeof(struct netinterface));
     if (ret == -1) {
         return 1;

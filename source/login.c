@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
 
             tcsetattr(STDIN_FILENO, TCSANOW, &save);
 
-            char requested[64];
+            unsigned char requested[64];
             char stringrequest[64 * 2];
             gcry_md_hash_buffer(GCRY_MD_SHA512, requested, user, strlen(user));
             convert(requested, stringrequest, 64);

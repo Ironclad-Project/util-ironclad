@@ -27,7 +27,6 @@
 #include <errno.h>
 
 int main(int argc, char *argv[]) {
-    int setincrement = 0;
     int increment = 0;
     int setpid = 0;
     int pid = 0;
@@ -54,7 +53,6 @@ int main(int argc, char *argv[]) {
                puts("renice" VERSION_STR);
                return 0;
             case 'n':
-               setincrement = 1;
                if (sscanf(optarg, "%d", &increment) != 1) {
                    fprintf(stderr, "renice: '%s' is not a valid increment", optarg);
                }
@@ -94,7 +92,7 @@ int main(int argc, char *argv[]) {
         which = PRIO_PROCESS;
         who = pid;
     } else {
-       fprintf(stderr, "renice: No entity to set niceness of\n", optopt);
+       fprintf(stderr, "renice: No entity to set niceness of\n");
        return 1;
     }
 
