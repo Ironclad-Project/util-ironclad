@@ -77,7 +77,7 @@ override CPPFLAGS := \
 
 # Targets.
 .PHONY: all
-all: bin/cpuinfo bin/execmac bin/ifconfig bin/ipcs bin/klog bin/logger bin/login \
+all: bin/cpuinfo bin/execmac bin/ifconfig bin/ipcrm bin/ipcs bin/klog bin/logger bin/login \
 	bin/lp bin/lslocks bin/mount bin/newgrp bin/ps bin/renice bin/showmem bin/strace \
 	bin/su bin/umount bin/uptime bin/watch
 
@@ -92,6 +92,10 @@ bin/execmac:
 bin/ifconfig:
 	$(MKDIR_P) bin
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(call MKESCAPE,$(SRCDIR))/source/ifconfig.c $(LIBS) -o $@
+
+bin/ipcrm:
+	$(MKDIR_P) bin
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(call MKESCAPE,$(SRCDIR))/source/ipcrm.c $(LIBS) -o $@
 
 bin/ipcs:
 	$(MKDIR_P) bin
@@ -198,6 +202,7 @@ install: all
 	$(INSTALL_PROGRAM) bin/cpuinfo '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/execmac '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/ifconfig '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
+	$(INSTALL_PROGRAM) bin/ipcrm '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/ipcs '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/klog '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/logger '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
@@ -221,6 +226,7 @@ install-strip: install
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/cpuinfo
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/execmac
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/ifconfig
+	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/ipcrm
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/ipcs
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/klog
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/logger
@@ -244,6 +250,7 @@ uninstall:
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/cpuinfo
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/execmac
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/ifconfig
+	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/ipcrm
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/ipcs
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/klog
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/logger
