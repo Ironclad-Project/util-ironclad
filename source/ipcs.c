@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
         "bytes", "nattach");
     for (int i = 1; i <= 20; i++) {
         if (!shmctl(i, IPC_STAT, &buf)) {
-            printf("%010d %5d %10d %10d %10zu %6ld\n", buf.shm_perm.__ipc_perm_key,
+            printf("%010d %5d %10d %10o %10zu %6ld\n", buf.shm_perm.__ipc_perm_key,
                 i, buf.shm_perm.uid, buf.shm_perm.mode, buf.shm_segsz,
                 buf.shm_nattch);
         }
