@@ -58,277 +58,159 @@ struct registers {
     uint64_t ss;
 } __attribute__((packed));
 
+struct thread_info {
+    uint16_t tid;
+    int is_syscall;
+};
+
+struct syscall_info {
+    char *name;
+    int arg_count;
+};
+
+#define MAX_SYSCALL_IDX 94
+static const struct syscall_info syscalls[] = {
+    [0] = (struct syscall_info){"exit", 1},
+    [1] = (struct syscall_info){"arch_prctl", 2},
+    [2] = (struct syscall_info){"open", 4},
+    [3] = (struct syscall_info){"close", 1},
+    [4] = (struct syscall_info){"read", 3},
+    [5] = (struct syscall_info){"write", 3},
+    [6] = (struct syscall_info){"seek", 3},
+    [7] = (struct syscall_info){"mmap", 6},
+    [8] = (struct syscall_info){"munmap", 2},
+    [9] = (struct syscall_info){"get_pid", 0},
+    [10] = (struct syscall_info){"get_ppid", 0},
+    [11] = (struct syscall_info){"exec", 6},
+    [12] = (struct syscall_info){"clone", 6},
+    [13] = (struct syscall_info){"wait", 3},
+    [14] = (struct syscall_info){"socket", 2},
+    [15] = (struct syscall_info){"set_hostname", 2},
+    [16] = (struct syscall_info){"unlink", 3},
+    [17] = (struct syscall_info){"fstat", 5},
+    [18] = (struct syscall_info){"chdir", 1},
+    [19] = (struct syscall_info){"ioctl", 3},
+    [20] = (struct syscall_info){"sched_yield", 0},
+    [22] = (struct syscall_info){"delete_tcluster", 1},
+    [23] = (struct syscall_info){"pipe", 2},
+    [24] = (struct syscall_info){"get_uid", 0},
+    [25] = (struct syscall_info){"rename", 7},
+    [26] = (struct syscall_info){"sysconf", 3},
+    [27] = (struct syscall_info){"spawn", 7},
+    [28] = (struct syscall_info){"get_tid", 0},
+    [29] = (struct syscall_info){"manage_tcluster", 4},
+    [30] = (struct syscall_info){"fcntl", 3},
+    [31] = (struct syscall_info){"exit_thread", 0},
+    [32] = (struct syscall_info){"getrandom", 2},
+    [33] = (struct syscall_info){"mprotect", 3},
+    [34] = (struct syscall_info){"sync", 0},
+    [35] = (struct syscall_info){"set_mac_capabilities", 1},
+    [36] = (struct syscall_info){"get_mac_capabilities", 0},
+    [37] = (struct syscall_info){"add_mac_permissions", 3},
+    [38] = (struct syscall_info){"set_mac_enforcement", 1},
+    [39] = (struct syscall_info){"mount", 6},
+    [40] = (struct syscall_info){"umount", 3},
+    [41] = (struct syscall_info){"readlink", 5},
+    [42] = (struct syscall_info){"getdents", 3},
+    [43] = (struct syscall_info){"makenode", 5},
+    [44] = (struct syscall_info){"truncate", 2},
+    [45] = (struct syscall_info){"bind", 3},
+    [46] = (struct syscall_info){"symlink", 6},
+    [47] = (struct syscall_info){"connect", 3},
+    [48] = (struct syscall_info){"openpty", 3},
+    [49] = (struct syscall_info){"fsync", 2},
+    [50] = (struct syscall_info){"link", 6},
+    [51] = (struct syscall_info){"ptrace", 4},
+    [52] = (struct syscall_info){"listen", 2},
+    [53] = (struct syscall_info){"accept", 4},
+    [54] = (struct syscall_info){"getrlimit", 1},
+    [55] = (struct syscall_info){"setrlimit", 2},
+    [56] = (struct syscall_info){"faccess", 5},
+    [57] = (struct syscall_info){"poll", 3},
+    [58] = (struct syscall_info){"geteuid", 0},
+    [59] = (struct syscall_info){"setuids", 2},
+    [60] = (struct syscall_info){"fchmod", 5},
+    [61] = (struct syscall_info){"umask", 1},
+    [62] = (struct syscall_info){"reboot", 2},
+    [63] = (struct syscall_info){"fchown", 6},
+    [64] = (struct syscall_info){"pread", 4},
+    [65] = (struct syscall_info){"pwrite", 4},
+    [66] = (struct syscall_info){"getsockname", 3},
+    [67] = (struct syscall_info){"getpeername", 3},
+    [68] = (struct syscall_info){"shutdown", 2},
+    [69] = (struct syscall_info){"futex", 4},
+    [70] = (struct syscall_info){"clock", 3},
+    [71] = (struct syscall_info){"clock_nanosleep", 4},
+    [72] = (struct syscall_info){"getrusage", 2},
+    [73] = (struct syscall_info){"recvfrom", 6},
+    [74] = (struct syscall_info){"sendto", 6},
+    [75] = (struct syscall_info){"config_netinterface", 3},
+    [76] = (struct syscall_info){"utimes", 5},
+    [77] = (struct syscall_info){"create_tcluster", 0},
+    [78] = (struct syscall_info){"switch_tcluster", 2},
+    [79] = (struct syscall_info){"actually_kill", 1},
+    [80] = (struct syscall_info){"signalpost", 1},
+    [81] = (struct syscall_info){"sendsignal", 2},
+    [82] = (struct syscall_info){"getprio", 2},
+    [83] = (struct syscall_info){"setprio", 3},
+    [84] = (struct syscall_info){"getgid", 0},
+    [85] = (struct syscall_info){"getegid", 0},
+    [86] = (struct syscall_info){"setgids", 2},
+    [87] = (struct syscall_info){"getgroups", 2},
+    [88] = (struct syscall_info){"setgroups", 2},
+    [89] = (struct syscall_info){"ttyname", 3},
+    [90] = (struct syscall_info){"fadvise", 4},
+    [91] = (struct syscall_info){"shmat", 3},
+    [92] = (struct syscall_info){"shmctl", 3},
+    [93] = (struct syscall_info){"shmdt", 1},
+    [94] = (struct syscall_info){"shmget", 3}
+};
+
 static void print_syscall(FILE *out, struct registers state) {
-    switch (state.rax) {
-        case SYSCALL_EXIT:
-            fprintf(out, "exit(0x%lx)\n", state.rdi);
-            break;
-        case SYSCALL_ARCH_PRCTL:
-            fprintf(out, "arch_prctl(0x%lx, 0x%lx)", state.rdi, state.rsi);
-            break;
-        case SYSCALL_OPEN:
-            fprintf(out, "open(0x%lx, 0x%lx, 0x%lx, 0x%lx)", state.rdi,
-                    state.rsi, state.rdx, state.r12);
-            break;
-        case SYSCALL_CLOSE:
-            fprintf(out, "close(0x%lx)", state.rdi);
-            break;
-        case SYSCALL_READ:
-            fprintf(out, "read(0x%lx, 0x%lx, 0x%lx)", state.rdi, state.rsi,
-                    state.rdx);
-            break;
-        case SYSCALL_WRITE:
-            fprintf(out, "write(0x%lx, 0x%lx, 0x%lx)", state.rdi, state.rsi,
-                    state.rdx);
-            break;
-        case SYSCALL_SEEK:
-            fprintf(out, "seek(0x%lx, 0x%lx, 0x%lx)", state.rdi, state.rsi,
-                    state.rdx);
-            break;
-        case SYSCALL_MMAP:
-            fprintf(out, "mmap(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx, state.r12, state.r8,
-                    state.r9);
-            break;
-        case SYSCALL_MUNMAP:
-            fprintf(out, "munmap(0x%lx, 0x%lx)", state.rdi, state.rsi);
-            break;
-        case SYSCALL_GETPID:
-            fprintf(out, "getpid()");
-            break;
-        case SYSCALL_GETPPID:
-            fprintf(out, "getppid()");
-            break;
-        case SYSCALL_EXEC:
-            fprintf(out, "exec(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)\n",
-                    state.rdi, state.rsi, state.rdx, state.r12, state.r8,
-                    state.r9);
-            break;
-        case SYSCALL_CLONE:
-            fprintf(out, "clone(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx, state.r12, state.r8, state.r9);
-            break;
-        case SYSCALL_WAIT:
-            fprintf(out, "wait(0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx);
-            break;
-        case SYSCALL_SOCKET:
-            fprintf(out, "socket(0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx);
-            break;
-        case SYSCALL_SETHOSTNAME:
-            fprintf(out, "sethostname(0x%lx, 0x%lx)", state.rdi, state.rsi);
-            break;
-        case SYSCALL_STAT:
-            fprintf(out, "stat(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx, state.r12, state.r8);
-            break;
-        case SYSCALL_CHDIR:
-            fprintf(out, "chdir(0x%lx)", state.rdi);
-            break;
-        case SYSCALL_IOCTL:
-            fprintf(out, "ioctl(0x%lx, 0x%lx, 0x%lx)", state.rdi, state.rsi,
-                    state.rdx);
-            break;
-        case SYSCALL_SCHED_YIELD:
-            fprintf(out, "sched_yield()");
-            break;
-        case SYSCALL_DELETE_TCLUSTER:
-            fprintf(out, "delete_tcluster(0x%lx)", state.rdi);
-            break;
-        case SYSCALL_PIPE:
-            fprintf(out, "pipe(0x%lx, 0x%lx)", state.rdi, state.rsi);
-            break;
-        case SYSCALL_GETUID:
-            fprintf(out, "getuid()");
-            break;
-        case SYSCALL_RENAME:
-            fprintf(out, "rename(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx, state.r12, state.r8,
-                    state.r9, state.r10);
-            break;
-        case SYSCALL_SYSCONF:
-            fprintf(out, "sysconf(0x%lx, 0x%lx, 0x%lx)", state.rdi, state.rsi,
-                    state.rdx);
-            break;
-        case SYSCALL_SPAWN:
-            fprintf(out, "spawn(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx, state.r12, state.r8,
-                    state.r9, state.r10);
-            break;
-        case SYSCALL_GETTID:
-            fprintf(out, "gettid()");
-            break;
-        case SYSCALL_MANAGE_TCLUSTER:
-            fprintf(out, "manage_tcluster(0x%lx, 0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx, state.r12);
-            break;
-        case SYSCALL_FCNTL:
-            fprintf(out, "fcntl(0x%lx, 0x%lx, 0x%lx)", state.rdi, state.rsi,
-                    state.rdx);
-            break;
-        case SYSCALL_GETRANDOM:
-            fprintf(out, "getrandom(0x%lx, 0x%lx)", state.rdi, state.rsi);
-            break;
-        case SYSCALL_MPROTECT:
-            fprintf(out, "mprotect(0x%lx, 0x%lx, 0x%lx)", state.rdi, state.rsi,
-                    state.rdx);
-            break;
-        case SYSCALL_SET_MAC_CAPABILITIES:
-            fprintf(out, "set_mac_caps(0x%lx)", state.rdi);
-            break;
-        case SYSCALL_GET_MAC_CAPABILITIES:
-            fprintf(out, "get_mac_caps()");
-            break;
-        case SYSCALL_ADD_MAC_PERMISSIONS:
-            fprintf(out, "add_mac_perms(0x%lx, 0x%lx, 0x%lx)", state.rdi, state.rsi,
-                    state.rdx);
-            break;
-        case SYSCALL_SET_MAC_ENFORCEMENT:
-            fprintf(out, "set_mac_enforcement(0x%lx)", state.rdi);
-            break;
-        case SYSCALL_MOUNT:
-            fprintf(out, "mount(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx, state.r12, state.r8, state.r9);
-            break;
-        case SYSCALL_UMOUNT:
-            fprintf(out, "umount(0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx);
-            break;
-        case SYSCALL_READLINK:
-            fprintf(out, "readlink(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx, state.r12, state.r8);
-            break;
-        case SYSCALL_GETDENTS:
-            fprintf(out, "getdents(0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx);
-            break;
-        case SYSCALL_SYNC:
-            fprintf(out, "sync()");
-            break;
-        case SYSCALL_MAKENODE:
-            fprintf(out, "makenode(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx, state.r12, state.r8);
-            break;
-        case SYSCALL_UNLINK:
-            fprintf(out, "unlink(0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx);
-            break;
-        case SYSCALL_TRUNCATE:
-            fprintf(out, "truncate(0x%lx, 0x%lx)", state.rdi, state.rsi);
-            break;
-        case SYSCALL_BIND:
-            fprintf(out, "bind(0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx);
-            break;
-        case SYSCALL_SYMLINK:
-            fprintf(out, "symlink(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx, state.r12, state.r8, state.r9);
-            break;
-        case SYSCALL_CONNECT:
-            fprintf(out, "connect(0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx);
-            break;
-        case SYSCALL_OPENPTY:
-            fprintf(out, "openpty(0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx);
-            break;
-        case SYSCALL_FSYNC:
-            fprintf(out, "fsync(0x%lx, 0x%lx)", state.rdi, state.rsi);
-            break;
-        case SYSCALL_LINK:
-            fprintf(out, "link(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx, state.r12, state.r8, state.r9);
-            break;
-        case SYSCALL_PTRACE:
-            fprintf(out, "ptrace(0x%lx, 0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx, state.r12);
-            break;
-        case SYSCALL_LISTEN:
-            fprintf(out, "listen(0x%lx, 0x%lx)", state.rdi, state.rsi);
-            break;
-        case SYSCALL_ACCEPT:
-            fprintf(out, "accept(0x%lx, 0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx, state.r12);
-            break;
-        case SYSCALL_GETRLIMIT:
-            fprintf(out, "getrlimit(0x%lx)", state.rdi);
-            break;
-        case SYSCALL_SETRLIMIT:
-            fprintf(out, "setrlimit(0x%lx, 0x%lx)", state.rdi, state.rsi);
-            break;
-        case SYSCALL_ACCESS:
-            fprintf(out, "access(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx, state.r12, state.r8);
-            break;
-        case SYSCALL_POLL:
-            fprintf(out, "poll(0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx);
-            break;
-        case SYSCALL_GETEUID:
-            fprintf(out, "geteuid()");
-            break;
-        case SYSCALL_SETUIDS:
-            fprintf(out, "setuids(0x%lx, 0x%lx)", state.rdi, state.rsi);
-            break;
-        case SYSCALL_FCHMOD:
-            fprintf(out, "chmod(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx, state.r12, state.r8);
-            break;
-        case SYSCALL_UMASK:
-            fprintf(out, "umask(0x%lx)", state.rdi);
-            break;
-        case SYSCALL_REBOOT:
-            fprintf(out, "reboot(0x%lx, 0x%lx)", state.rdi, state.rsi);
-            break;
-        case SYSCALL_FCHOWN:
-            fprintf(out, "chown(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx, state.r12, state.r8);
-            break;
-        case SYSCALL_PREAD:
-            fprintf(out, "pread(0x%lx, 0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx, state.r12);
-            break;
-        case SYSCALL_PWRITE:
-            fprintf(out, "pwrite(0x%lx, 0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx, state.r12);
-            break;
-        case SYSCALL_GETSOCKNAME:
-            fprintf(out, "getsockname(0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx);
-            break;
-        case SYSCALL_GETPEERNAME:
-            fprintf(out, "getpeername(0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx);
-            break;
-        case SYSCALL_SHUTDOWN:
-            fprintf(out, "shutdown(0x%lx, 0x%lx)", state.rdi, state.rsi);
-            break;
-        case SYSCALL_FUTEX:
-            fprintf(out, "futex(0x%lx, 0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx, state.r12);
-            break;
-        case SYSCALL_CLOCK:
-            fprintf(out, "clock(0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx);
-            break;
-        case SYSCALL_CLOCK_NANOSLEEP:
-            fprintf(out, "clock_nanosleep(0x%lx, 0x%lx, 0x%lx, 0x%lx)",
-                    state.rdi, state.rsi, state.rdx, state.r12);
-            break;
-        default:
-            fprintf(out, "(%lu)(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)",
-                    state.rax, state.rdi, state.rsi, state.rdx, state.r12,
-                    state.r8, state.r9);
-            break;
+    if (state.rax > MAX_SYSCALL_IDX) {
+        fprintf(out, "(%lu)(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)",
+        state.rax, state.rdi, state.rsi, state.rdx, state.r12,
+        state.r8, state.r9);
+    } else {
+        fprintf(out, "%s(", syscalls[state.rax].name);
+        switch (syscalls[state.rax].arg_count) {
+            case 0:
+                break;
+            case 1:
+                fprintf(out, "0x%lx", state.rdi);
+                break;
+            case 2:
+                fprintf(out, "0x%lx, 0x%lx", state.rdi, state.rsi);
+                break;
+            case 3:
+                fprintf(out, "0x%lx, 0x%lx, 0x%lx", state.rdi, state.rsi,
+                  state.rdx);
+                break;
+            case 4:
+                fprintf(out, "0x%lx, 0x%lx, 0x%lx, 0x%lx", state.rdi, state.rsi,
+                  state.rdx, state.r12);
+                break;
+            case 5:
+                fprintf(out, "0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx", state.rdi,
+                  state.rsi, state.rdx, state.r12, state.r8);
+                break;
+            case 6:
+                fprintf(out, "0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx",
+                  state.rdi, state.rsi, state.rdx, state.r12, state.r8, state.r9);
+                break;
+            default:
+                fprintf(out, "too many args");
+                break;
+        }
+        fprintf(out, ")");
     }
 }
 
 static void print_error(FILE *out, struct registers state) {
     if (state.rdx) {
-       fprintf(out, " = 0x%lx (%lu)\n", state.rax, state.rdx);
+       fprintf(out, " = 0x%lx (%lu)", state.rax, state.rdx);
     } else {
-       fprintf(out, " = 0x%lx\n", state.rax);
+       fprintf(out, " = 0x%lx", state.rax);
     }
 }
 
@@ -397,15 +279,18 @@ END_WHILE:
     }
 
     // Poll for data to translate and print.
-    // We also close our writer end so we get POLLHUP when the pipe is broken
-    // (process closed), else we can potentially loop forever!
     close(pipes[1]);
     struct pollfd polled = {
         .fd      = pipes[0],
         .events  = POLLIN,
         .revents = 0
     };
-    bool is_syscall = true;
+
+    // We keep an array as well for each thread we find in order to know how
+    // to continue syscalls without being nonsensical.
+    int thread_count = 0;
+    struct thread_info *infos = NULL;
+
     while (true) {
         ret = poll(&polled, 1, -1);
         if (ret == -1) {
@@ -414,18 +299,37 @@ END_WHILE:
         }
         if (polled.revents & POLLIN) {
            read(pipes[0], &thread_id, sizeof(uint16_t));
-           if (read(pipes[0], &state, sizeof(state)) == sizeof(state)) {
-               if (is_syscall == true) {
-                   fprintf(out, "%d: ", thread_id);
-                   print_syscall(out, state);
-                   is_syscall = state.rax == SYSCALL_EXIT        ||
-                                state.rax == SYSCALL_EXIT_THREAD ||
-                                state.rax == SYSCALL_EXEC;
-               } else {
-                   print_error(out, state);
-                   is_syscall = true;
-               }
+           read(pipes[0], &state, sizeof(state));
 
+         PRINTER:
+           int found_idx = 0;
+           for (int i = 0; i < thread_count; i++) {
+               if (infos[i].tid == thread_id) {
+                   if (infos[i].is_syscall == true) {
+                       fprintf(out, "%d: ", thread_id);
+                       print_syscall(out, state);
+                       fprintf(out, "\n");
+                       infos[i].is_syscall = state.rax == SYSCALL_EXIT ||
+                                    state.rax == SYSCALL_EXIT_THREAD ||
+                                    state.rax == SYSCALL_EXEC;
+                   } else {
+                       fprintf(out, "\t%d: ", thread_id);
+                       print_error(out, state);
+                       fprintf(out, "\n");
+                       infos[i].is_syscall = true;
+                   }
+                   found_idx = 1;
+               }
+           }
+           if (!found_idx) {
+               infos = realloc(infos, (++thread_count) * sizeof(struct thread_info));
+               if (infos == NULL) {
+                   perror("strace: could not allocate thread information");
+                   return 1;
+               }
+               infos[thread_count - 1].tid = thread_id;
+               infos[thread_count - 1].is_syscall = true;
+               goto PRINTER;
            }
         }
         if (waitpid(child, &status, WNOHANG) == child) {
