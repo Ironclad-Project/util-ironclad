@@ -133,42 +133,28 @@ int main(int argc, char *argv[]) {
 
         long ret, errno;
         SYSCALL3(SYSCALL_SYSCONF, SC_LIST_THREADS, buffer, 50 * sizeof(struct procinfo));
-        if (ret == -1) {
-            return 1;
-        } else if (ret > 50) {
-            return 1;
-        }
-        long ret2 = ret;
-
-        struct procinfo *buffer2 = malloc(50 * sizeof(struct procinfo));
-        SYSCALL3(SYSCALL_SYSCONF, SC_LIST_PROCS, buffer2, 50 * sizeof(struct procinfo));
-        if (ret == -1) {
-            return 1;
-        } else if (ret > 50) {
+        if (ret == -1 || ret > 50) {
             return 1;
         }
 
-        printf("%4s %4s %4s %4s %20s\n", "TID", "NICE", "TCID", "PID", "CMD");
-        for (int i = 0; i < ret2; i++) {
-            int found_idx = 0;
-            for (int j = 0; j < ret; j++) {
-                if (buffer2[j].pid == buffer[i].pid) {
-                    found_idx = j;
-                    break;
-                }
+        const long count = ret;
+        printf("%4s %4s %4s %4s %20s\n", "TID", "NICE", "TCID", "PID", "ID");
+        for (int i = 0; i < count; i++) {
+            char id_buf[64];
+            SYSCALL3(SYSCALL_GETTIDID, buffer[i].tid, id_buf, 64);
+            if (ret != 0) {
+                strcpy(id_buf, " ");
             }
+
             printf("%4d %4" PRId16 " %4d", buffer[i].tid, buffer[i].niceness, buffer[i].tcid);
-            printf("%4d %20.*s\n", buffer[i].pid,
-               buffer2[found_idx].id_len, buffer2[found_idx].id);
+            printf("%4d %20.*s\n", buffer[i].pid, (int)strlen(id_buf), id_buf);
         }
     } else if (print_clusters) {
         struct tclusterinfo *buffer = malloc(50 * sizeof(struct tclusterinfo));
 
         long ret, errno;
         SYSCALL3(SYSCALL_SYSCONF, SC_LIST_CLUSTERS, buffer, 50 * sizeof(struct tclusterinfo));
-        if (ret == -1) {
-            return 1;
-        } else if (ret > 50) {
+        if (ret == -1 || ret > 50) {
             return 1;
         }
 
@@ -192,9 +178,7 @@ int main(int argc, char *argv[]) {
 
         long ret, errno;
         SYSCALL3(SYSCALL_SYSCONF, SC_LIST_PROCS, buffer, 50 * sizeof(struct procinfo));
-        if (ret == -1) {
-            return 1;
-        } else if (ret > 50) {
+        if (ret == -1 || ret > 50) {
             return 1;
         }
 
