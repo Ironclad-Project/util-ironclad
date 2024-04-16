@@ -111,7 +111,7 @@ bin/logger:
 
 bin/login:
 	$(MKDIR_P) bin
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -lgcrypt $(call MKESCAPE,$(SRCDIR))/source/login.c $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(call MKESCAPE,$(SRCDIR))/source/login.c -lgcrypt $(LIBS) -o $@
 
 bin/lp:
 	$(MKDIR_P) bin
