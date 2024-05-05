@@ -79,11 +79,15 @@ override CPPFLAGS := \
 .PHONY: all
 all: bin/cpuinfo bin/execmac bin/ifconfig bin/ipcrm bin/ipcs bin/klog bin/logger bin/login \
 	bin/lp bin/lslocks bin/mount bin/newgrp bin/ps bin/renice bin/showmem bin/strace \
-	bin/su bin/umount bin/uptime bin/watch
+	bin/su bin/umount bin/uptime bin/watch bin/dumper
 
 bin/cpuinfo:
 	$(MKDIR_P) bin
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(call MKESCAPE,$(SRCDIR))/source/cpuinfo.c $(LIBS) -o $@
+
+bin/dumper:
+	$(MKDIR_P) bin
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(call MKESCAPE,$(SRCDIR))/source/dumper.c $(LIBS) -o $@
 
 bin/execmac:
 	$(MKDIR_P) bin
@@ -200,6 +204,7 @@ maintainer-clean: distclean
 install: all
 	$(INSTALL) -d '$(call SHESCAPE,$(DESTDIR)$(bindir))'
 	$(INSTALL_PROGRAM) bin/cpuinfo '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
+	$(INSTALL_PROGRAM) bin/dumper '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/execmac '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/ifconfig '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/ipcrm '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
@@ -224,6 +229,7 @@ install: all
 .PHONY: install-strip
 install-strip: install
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/cpuinfo
+	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/dumper
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/execmac
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/ifconfig
 	$(NATIVE_STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/ipcrm
@@ -248,6 +254,7 @@ install-strip: install
 .PHONY: uninstall
 uninstall:
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/cpuinfo
+	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/dumper
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/execmac
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/ifconfig
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/ipcrm
