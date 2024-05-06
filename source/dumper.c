@@ -105,7 +105,7 @@ END_WHILE:
         return 1;
     }
 
-    printf("Register dump at the time of fault (" PRIx64 "):\n", contents->rip);
+    printf("Register dump at the time of fault (%" PRIx64 "):\n", contents->rip);
     printf("RAX: %016" PRIx64 " RBX: %016" PRIx64 " RCX: %016" PRIx64 "\n", contents->rax, contents->rbx, contents->rcx);
     printf("RDX: %016" PRIx64 " RSI: %016" PRIx64 " RDI: %016" PRIx64 "\n", contents->rdx, contents->rsi, contents->rdi);
     printf("RBP: %016" PRIx64 " R8:  %016" PRIx64 " R9:  %016" PRIx64 "\n", contents->rbp, contents->r8, contents->r9);
