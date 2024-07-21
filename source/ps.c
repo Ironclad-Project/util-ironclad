@@ -28,12 +28,8 @@
 
 #define SC_LIST_PROCS   8
 #define SC_LIST_THREADS 12
-#define SC_LIST_CLUSTERS 13
 #define PROC_IS_TRACED  0b01
 #define PROC_EXITED     0b10
-#define SCHED_RR   0b001
-#define SCHED_COOP 0b010
-#define SCHED_INTR 0b100
 
 struct procinfo {
     char     id[20];
@@ -44,18 +40,10 @@ struct procinfo {
     uint32_t flags;
 } __attribute__((packed));
 
-
 struct threadinfo {
     uint16_t tid;
     int16_t  niceness;
-    uint16_t tcid;
     uint16_t pid;
-} __attribute__((packed));
-
-struct tclusterinfo {
-    uint16_t tcid;
-    uint16_t tcflags;
-    uint16_t tcquantum;
 } __attribute__((packed));
 
 static void print_process_list_header(void) {
@@ -81,7 +69,6 @@ static void print_process_list_process(struct procinfo *proc) {
 int main(int argc, char *argv[]) {
     int print_all_users = 0;
     int print_threads   = 0;
-    int print_clusters  = 0;
     int print_running   = 0;
     int print_only_this = 0;
     int print_only_this_name = 0;
@@ -98,7 +85,6 @@ int main(int argc, char *argv[]) {
                 puts("-v          Display version information.");
                 puts("-A          Print all processes regardless of user and filters");
                 puts("-T          Print threads instead of processes");
-                puts("-C          Print thread clusters instead of processes");
                 puts("-r          Print running ones only");
                 puts("-p <pid>    Only print information of the passed PID");
                 puts("-o <format> Format of process information output");
@@ -108,7 +94,6 @@ int main(int argc, char *argv[]) {
                return 0;
             case 'A': print_all_users = 1; break;
             case 'T': print_threads   = 1; break;
-            case 'C': print_clusters  = 1; break;
             case 'r': print_running   = 1; break;
             case 'p':
                 if (sscanf(optarg, "%d", &print_only_this) != 1) {
@@ -138,7 +123,7 @@ int main(int argc, char *argv[]) {
         }
 
         const long count = ret;
-        printf("%4s %4s %4s %4s %20s\n", "TID", "NICE", "TCID", "PID", "ID");
+        printf("%4s %4s %4s %20s\n", "TID", "NICE", "PID", "ID");
         for (int i = 0; i < count; i++) {
             char id_buf[64];
             SYSCALL3(SYSCALL_GETTIDID, buffer[i].tid, id_buf, 64);
@@ -146,32 +131,8 @@ int main(int argc, char *argv[]) {
                 strcpy(id_buf, " ");
             }
 
-            printf("%4d %4" PRId16 " %4d", buffer[i].tid, buffer[i].niceness, buffer[i].tcid);
+            printf("%4d %4" PRId16 " ", buffer[i].tid, buffer[i].niceness);
             printf("%4d %20.*s\n", buffer[i].pid, (int)strlen(id_buf), id_buf);
-        }
-    } else if (print_clusters) {
-        struct tclusterinfo *buffer = malloc(50 * sizeof(struct tclusterinfo));
-
-        long ret, errno;
-        SYSCALL3(SYSCALL_SYSCONF, SC_LIST_CLUSTERS, buffer, 50 * sizeof(struct tclusterinfo));
-        if (ret == -1 || ret > 50) {
-            return 1;
-        }
-
-        printf("%4s %7s %4s\n", "TCID", "ALGO(I)", "QTUM");
-        for (int i = 0; i < ret; i++) {
-            printf("%4d ", buffer[i].tcid);
-            if (buffer[i].tcflags & SCHED_RR) {
-                printf("  RR");
-            } else if (buffer[i].tcflags & SCHED_COOP) {
-                printf("COOP");
-            }
-            if (buffer[i].tcflags & SCHED_INTR) {
-                printf("(*)");
-            } else {
-                printf("   ");
-            }
-            printf(" %4d\n", buffer[i].tcquantum);
         }
     } else {
         struct procinfo *buffer = malloc(50 * sizeof(struct procinfo));
