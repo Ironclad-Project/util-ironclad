@@ -1,6 +1,6 @@
 /*
     showmem.c: Display memory statistics.
-    Copyright (C) 2023 streaksu
+    Copyright (C) 2024 streaksu
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,16 +23,23 @@
 #include <math.h>
 #include <commons.h>
 
-#define SC_PAGESIZE      1
-#define SC_AVPHYS_PAGES  4
-#define SC_PHYS_PAGES    5
-#define SC_TOTAL_PAGES   7
+#define SC_MEMINFO 20
+
+struct mem_info {
+    // All data is in bytes.
+    uint64_t phys_total;     // Total physical memory of the system.
+    uint64_t phys_available; // Non-reserved memory managed by the system.
+    uint64_t phys_free;      // Free memory available to the system.
+    uint64_t shared_usage;   // Amount of shared memory in the system.
+    uint64_t kernel_usage;   // Amount of memory in use by the kernel.
+    uint64_t table_usage;    // Of the kernel, amount in use for page tables.
+};
 
 int main(int argc, char *argv[]) {
-    int print_only_free      = 0;
-    int print_only_used      = 0;
-    int print_only_available = 0;
-    int print_only_installed = 0;
+    int print_only_free  = 0;
+    int print_only_used  = 0;
+    int print_only_avail = 0;
+    int print_only_total = 0;
 
     char c;
     while ((c = getopt (argc, argv, "hfutv")) != -1) {
@@ -41,17 +48,17 @@ int main(int argc, char *argv[]) {
                 puts("Usage: showmem [options]");
                 puts("");
                 puts("Options:");
-                puts("-h              Print this help message");
-                puts("-f              Print free memory (in MiB)");
-                puts("-u              Print used memory (in MiB)");
-                puts("-t              Print available memory (in MiB)");
-                puts("-i              Print total installed memory (in MiB)");
-                puts("-v              Display version information.");
+                puts("-h      Print this help message");
+                puts("-f      Print free memory (in MiB)");
+                puts("-u      Print used memory (in MiB)");
+                puts("-t      Print available memory (in MiB)");
+                puts("-i      Print total installed system memory (in MiB)");
+                puts("-v      Display version information.");
                 return 0;
-            case 'f': print_only_free      = 1; break;
-            case 'u': print_only_used      = 1; break;
-            case 't': print_only_available = 1; break;
-            case 'i': print_only_installed = 1; break;
+            case 'f': print_only_free  = 1; break;
+            case 'u': print_only_used  = 1; break;
+            case 't': print_only_avail = 1; break;
+            case 'i': print_only_total = 1; break;
             case 'v':
                puts("showmem" VERSION_STR);
                return 0;
@@ -61,46 +68,35 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    long page_size, free_pages, available_pages, total_pages, ret, errno;
-    SYSCALL1(SYSCALL_SYSCONF, SC_PAGESIZE);
-    if (ret == -1) {
+    int ret, errno;
+    struct mem_info meminfo;
+    SYSCALL3(SYSCALL_SYSCONF, SC_MEMINFO, &meminfo, 0);
+    if (ret != 0) {
         return 1;
-    } else {
-        page_size = ret;
-    }
-    SYSCALL1(SYSCALL_SYSCONF, SC_AVPHYS_PAGES);
-    if (ret == -1) {
-        return 1;
-    } else {
-        free_pages = ret;
-    }
-    SYSCALL1(SYSCALL_SYSCONF, SC_PHYS_PAGES);
-    if (ret == -1) {
-        return 1;
-    } else {
-        available_pages = ret;
-    }
-    SYSCALL1(SYSCALL_SYSCONF, SC_TOTAL_PAGES);
-    if (ret == -1) {
-        return 1;
-    } else {
-        total_pages = ret;
     }
 
-    long free      = (free_pages      * page_size) / 1000000;
-    long available = (available_pages * page_size) / 1000000;
-    long total     = (total_pages     * page_size) / 1000000;
-    int width      = round(1 + log(total) / log(10));
+    // Translate all values to kilobytes.
+    const long free       = meminfo.phys_free      / 1000;
+    const long available  = meminfo.phys_available / 1000;
+    const long total      = meminfo.phys_total     / 1000;
+    const long shared_mem = meminfo.shared_usage   / 1000;
+    const long kernel_mem = meminfo.kernel_usage   / 1000;
+    const long table_mem  = meminfo.table_usage    / 1000;
 
-    if (print_only_free)           { printf("%lu\n", free);                 }
-    else if (print_only_used)      { printf("%lu\n", available - free);     }
-    else if (print_only_available) { printf("%lu\n", available);            }
-    else if (print_only_installed) { printf("%lu\n", total);                }
+    if (print_only_free)       { printf("%lu\n", free / 1000);               }
+    else if (print_only_used)  { printf("%lu\n", (available - free) / 1000); }
+    else if (print_only_avail) { printf("%lu\n", available / 1000);          }
+    else if (print_only_total) { printf("%lu\n", total / 1000);              }
     else {
-        printf("Free physical memory:      %*luMiB\n", width, free);
-        printf("Used physical memory:      %*luMiB\n", width, available - free);
-        printf("Available physical memory: %*luMiB\n", width, available);
-        printf("Total physical memory:     %*luMiB\n", width, total);
+        const int width = round(1 + log(total) / log(10));
+
+        printf("Free memory:      %*lu kB\n", width, free);
+        printf("Used memory:      %*lu kB\n", width, available - free);
+        printf("Available memory: %*lu kB\n", width, available);
+        printf("Total memory:     %*lu kB\n", width, total);
+        printf("Shared memory:    %*lu kB\n", width, shared_mem);
+        printf("Kernel memory:    %*lu kB\n", width, kernel_mem);
+        printf("Table memory:     %*lu kB\n", width, table_mem);
     }
 
    return 0;
