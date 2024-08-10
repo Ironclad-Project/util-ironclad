@@ -33,6 +33,7 @@ struct mem_info {
     uint64_t shared_usage;   // Amount of shared memory in the system.
     uint64_t kernel_usage;   // Amount of memory in use by the kernel.
     uint64_t table_usage;    // Of the kernel, amount in use for page tables.
+    uint64_t poison_usage;   // Faulty memory.
 };
 
 int main(int argc, char *argv[]) {
@@ -79,9 +80,6 @@ int main(int argc, char *argv[]) {
     const long free       = meminfo.phys_free      / 1000;
     const long available  = meminfo.phys_available / 1000;
     const long total      = meminfo.phys_total     / 1000;
-    const long shared_mem = meminfo.shared_usage   / 1000;
-    const long kernel_mem = meminfo.kernel_usage   / 1000;
-    const long table_mem  = meminfo.table_usage    / 1000;
 
     if (print_only_free)       { printf("%lu\n", free / 1000);               }
     else if (print_only_used)  { printf("%lu\n", (available - free) / 1000); }
@@ -94,9 +92,10 @@ int main(int argc, char *argv[]) {
         printf("Used memory:      %*lu kB\n", width, available - free);
         printf("Available memory: %*lu kB\n", width, available);
         printf("Total memory:     %*lu kB\n", width, total);
-        printf("Shared memory:    %*lu kB\n", width, shared_mem);
-        printf("Kernel memory:    %*lu kB\n", width, kernel_mem);
-        printf("Table memory:     %*lu kB\n", width, table_mem);
+        printf("Shared memory:    %*lu kB\n", width, meminfo.shared_usage / 1000);
+        printf("Kernel memory:    %*lu kB\n", width, meminfo.kernel_usage / 1000);
+        printf("Table memory:     %*lu kB\n", width, meminfo.table_usage  / 1000);
+        printf("Poisoned memory:  %*lu kB\n", width, meminfo.poison_usage / 1000);
     }
 
    return 0;
