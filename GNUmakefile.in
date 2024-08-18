@@ -89,87 +89,87 @@ all: bin/cpuinfo bin/execmac bin/ifconfig bin/ipcrm bin/ipcs bin/klog bin/logger
 
 bin/cpuinfo:
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/source/cpuinfo.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/cpuinfo.c' $(LIBS) -o $@
 
 bin/dumper:
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/source/dumper.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/dumper.c' $(LIBS) -o $@
 
 bin/execmac:
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/source/execmac.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/execmac.c' $(LIBS) -o $@
 
 bin/ifconfig:
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/source/ifconfig.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/ifconfig.c' $(LIBS) -o $@
 
 bin/ipcrm:
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/source/ipcrm.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/ipcrm.c' $(LIBS) -o $@
 
 bin/ipcs:
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/source/ipcs.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/ipcs.c' $(LIBS) -o $@
 
 bin/klog:
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/source/klog.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/klog.c' $(LIBS) -o $@
 
 bin/logger:
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/source/logger.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/logger.c' $(LIBS) -o $@
 
 bin/login:
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/source/login.c' -lgcrypt $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/login.c' -lgcrypt $(LIBS) -o $@
 
 bin/lp:
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/source/lp.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/lp.c' $(LIBS) -o $@
 
 bin/lslocks:
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/source/lslocks.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/lslocks.c' $(LIBS) -o $@
 
 bin/mount:
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/source/mount.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/mount.c' $(LIBS) -o $@
 
 bin/newgrp:
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/source/newgrp.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/newgrp.c' $(LIBS) -o $@
 
 bin/ps:
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/source/ps.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/ps.c' $(LIBS) -o $@
 
 bin/renice:
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/source/renice.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/renice.c' $(LIBS) -o $@
 
 bin/showmem:
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/source/showmem.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/showmem.c' $(LIBS) -o $@
 
 bin/strace:
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/source/strace.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/strace.c' $(LIBS) -o $@
 
 bin/su:
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/source/su.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/su.c' $(LIBS) -o $@
 
 bin/umount:
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/source/umount.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/umount.c' $(LIBS) -o $@
 
 bin/uptime:
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/source/uptime.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/uptime.c' $(LIBS) -o $@
 
 bin/watch:
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/source/watch.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/watch.c' $(LIBS) -o $@
 
 .PHONY: clean
 clean:
