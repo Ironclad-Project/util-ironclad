@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    for (int i = 0; i < length; i += 80) {
+    for (size_t i = 0; i < length; i += 80) {
        if (logs[i] == '(') {
            printf("%.80s\n", logs + i);
        }

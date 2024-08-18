@@ -38,6 +38,7 @@ int main(int argc, char *argv[]) {
                 puts("-h              Print this help message");
                 puts("-s              Display only the uptime epoch seconds");
                 puts("-v              Display version information.");
+                return 0;
             case 's':
                 print_seconds = 1;
                 break;
