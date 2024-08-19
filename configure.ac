@@ -91,7 +91,7 @@ CFLAGS="$CFLAGS $PKGCONF_CFLAGS"
 CPPFLAGS="$PKGCONF_CPPFLAGS $CPPFLAGS"
 LIBS="$LIBS $PKGCONF_LIBS"
 
-AC_CHECK_HEADERS([cpuid.h errno.h fcntl.h gcrypt.h grp.h inttypes.h math.h
+AC_CHECK_HEADERS([errno.h fcntl.h gcrypt.h grp.h inttypes.h math.h
     poll.h pwd.h sched.h stdbool.h stddef.h stdint.h stdio.h stdlib.h string.h
     sys/ioctl.h sys/mac.h sys/mount.h sys/reboot.h sys/resource.h sys/shm.h
     sys/stat.h sys/syscall.h sys/wait.h syslog.h termios.h time.h unistd.h

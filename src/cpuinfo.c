@@ -26,7 +26,10 @@
 #include <commons.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <cpuid.h>
+
+#if defined(__x86_64_)
+   #include <cpuid.h>
+#endif
 
 int main(int argc, char *argv[]) {
     bool only_name  = false;
@@ -60,23 +63,42 @@ int main(int argc, char *argv[]) {
 
     // Fetch name.
     char name[48];
-    __cpuid(0x80000002, *(uint32_t *)(name +  0), *(uint32_t *)(name +  4), *(uint32_t *)(name +  8), *(uint32_t *)(name + 12));
-    __cpuid(0x80000003, *(uint32_t *)(name + 16), *(uint32_t *)(name + 20), *(uint32_t *)(name + 24), *(uint32_t *)(name + 28));
-    __cpuid(0x80000004, *(uint32_t *)(name + 32), *(uint32_t *)(name + 36), *(uint32_t *)(name + 40), *(uint32_t *)(name + 44));
+    #if defined(__x86_64_)
+        __cpuid(0x80000002, *(uint32_t *)(name +  0), *(uint32_t *)(name +  4), *(uint32_t *)(name +  8), *(uint32_t *)(name + 12));
+        __cpuid(0x80000003, *(uint32_t *)(name + 16), *(uint32_t *)(name + 20), *(uint32_t *)(name + 24), *(uint32_t *)(name + 28));
+        __cpuid(0x80000004, *(uint32_t *)(name + 32), *(uint32_t *)(name + 36), *(uint32_t *)(name + 40), *(uint32_t *)(name + 44));
+    #elif defined(__riscv) && __riscv_xlen == 64
+        strcpy(name, "generic riscv64 cpu");
+    #else
+        #error Architecture not supported!
+    #endif
 
     // Fetch vendor name.
     char vendor[12];
-    uint32_t throwaway = 0;
-    __cpuid(0x0, throwaway, *(uint32_t *)(&vendor[0] +  0), *(uint32_t *)(&vendor[0] +  8), *(uint32_t *)(&vendor[0] +  4));
+    #if defined(__x86_64_)
+        uint32_t throwaway = 0;
+        __cpuid(0x0, throwaway, *(uint32_t *)(&vendor[0] +  0), *(uint32_t *)(&vendor[0] +  8), *(uint32_t *)(&vendor[0] +  4));
+    #elif defined(__riscv) && __riscv_xlen == 64
+        strcpy(vendor, "GenuineRISCV");
+    #else
+        #error Architecture not supported!
+    #endif
 
     // Fetch core count.
-    uint32_t eax, ebx, ecx, edx, logical_cores;
-    __cpuid(1, eax, ebx, ecx, edx);
-    if ((edx & (1 << 28)) != 0) {
-        logical_cores = (ebx >> 16) & 0xff;
-    } else {
+    uint32_t logical_cores;
+    #if defined(__x86_64_)
+        uint32_t eax, ebx, ecx, edx;
+        __cpuid(1, eax, ebx, ecx, edx);
+        if ((edx & (1 << 28)) != 0) {
+            logical_cores = (ebx >> 16) & 0xff;
+        } else {
+            logical_cores = 1;
+        }
+    #elif defined(__riscv) && __riscv_xlen == 64
         logical_cores = 1;
-    }
+    #else
+        #error Architecture not supported!
+    #endif
 
     // Fetch frequency in GHz
     // TODO: Have a method for fetching it, these are placeholders.

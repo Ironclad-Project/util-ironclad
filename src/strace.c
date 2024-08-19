@@ -26,7 +26,6 @@
 #include <commons.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <cpuid.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <sched.h>
