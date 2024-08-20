@@ -27,7 +27,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#if defined(__x86_64_)
+#if defined(__x86_64__)
    #include <cpuid.h>
 #endif
 
@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
 
     // Fetch name.
     char name[48];
-    #if defined(__x86_64_)
+    #if defined(__x86_64__)
         __cpuid(0x80000002, *(uint32_t *)(name +  0), *(uint32_t *)(name +  4), *(uint32_t *)(name +  8), *(uint32_t *)(name + 12));
         __cpuid(0x80000003, *(uint32_t *)(name + 16), *(uint32_t *)(name + 20), *(uint32_t *)(name + 24), *(uint32_t *)(name + 28));
         __cpuid(0x80000004, *(uint32_t *)(name + 32), *(uint32_t *)(name + 36), *(uint32_t *)(name + 40), *(uint32_t *)(name + 44));
@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
 
     // Fetch vendor name.
     char vendor[12];
-    #if defined(__x86_64_)
+    #if defined(__x86_64__)
         uint32_t throwaway = 0;
         __cpuid(0x0, throwaway, *(uint32_t *)(&vendor[0] +  0), *(uint32_t *)(&vendor[0] +  8), *(uint32_t *)(&vendor[0] +  4));
     #elif defined(__riscv) && __riscv_xlen == 64
@@ -85,20 +85,7 @@ int main(int argc, char *argv[]) {
     #endif
 
     // Fetch core count.
-    uint32_t logical_cores;
-    #if defined(__x86_64_)
-        uint32_t eax, ebx, ecx, edx;
-        __cpuid(1, eax, ebx, ecx, edx);
-        if ((edx & (1 << 28)) != 0) {
-            logical_cores = (ebx >> 16) & 0xff;
-        } else {
-            logical_cores = 1;
-        }
-    #elif defined(__riscv) && __riscv_xlen == 64
-        logical_cores = 1;
-    #else
-        #error Architecture not supported!
-    #endif
+    uint32_t logical_cores = sysconf(_SC_NPROCESSORS_ONLN);
 
     // Fetch frequency in GHz
     // TODO: Have a method for fetching it, these are placeholders.
