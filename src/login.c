@@ -55,20 +55,27 @@ static void convert(unsigned char *src, char *out, int len) {
     }
 }
 
+#define USER_LEN 64
+
 int main(int argc, char *argv[]) {
     (void)argc;
     (void)argv;
 
     struct passwd *pwd;
-    char user[64];
+    char user[USER_LEN + 1];
 
     print_whole_file(issue_path);
 
     while (1) {
-        printf("\nusername: ");
+        printf("username: ");
         fflush(stdout);
-        scanf("%s", user);
+        fgets(user, USER_LEN, stdin);
         fflush(stdout);
+        user[strcspn(user, "\n")] = '\0';
+
+        if (strlen(user) == 0) {
+            continue;
+        }
 
         pwd = getpwnam(user);
         if (pwd == NULL) {
