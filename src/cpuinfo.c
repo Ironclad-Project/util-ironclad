@@ -87,11 +87,19 @@ int main(int argc, char *argv[]) {
     // Fetch core count.
     uint32_t logical_cores = sysconf(_SC_NPROCESSORS_ONLN);
 
-    // Fetch frequency in GHz
-    // TODO: Have a method for fetching it, these are placeholders.
-    double base_frequency      = 3.0;
-    double max_frequency       = 3.0;
-    double reference_frequency = 3.0;
+    // Fetch base frequency in GHz.
+    double base_frequency = 0;
+    double max_frequency = 0;
+    double reference_frequency = 0;
+
+    #if defined(__x86_64__)
+        uint32_t eax, ebx, ecx, edx;
+        if (__get_cpuid(0x16, &eax, &ebx, &ecx, &edx)) {
+            base_frequency = ((double)eax) / 1000;
+            max_frequency = ((double)ebx) / 1000;
+            reference_frequency = ((double)ecx) / 1000;
+        }
+    #endif
 
     if (only_name) {
         printf("%.*s\n", 48, name);
