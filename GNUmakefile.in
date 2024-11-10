@@ -77,9 +77,13 @@ override LIBS += \
 
 # Default target.
 .PHONY: all
-all: bin/cpuinfo bin/execmac bin/ifconfig bin/ipcrm bin/ipcs bin/klog bin/logger bin/login \
+all: bin/blkid bin/cpuinfo bin/execmac bin/ifconfig bin/ipcrm bin/ipcs bin/klog bin/logger bin/login \
 	bin/lp bin/lslocks bin/mount bin/newgrp bin/ps bin/renice bin/showmem bin/strace \
 	bin/su bin/umount bin/uptime bin/watch bin/dumper
+
+bin/blkid:
+	$(MKDIR_P) "$$(dirname $@)"
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/blkid.c' $(LIBS) -o $@
 
 bin/cpuinfo:
 	$(MKDIR_P) "$$(dirname $@)"
@@ -205,6 +209,7 @@ maintainer-clean: distclean
 .PHONY: install
 install: all
 	$(INSTALL) -d '$(call SHESCAPE,$(DESTDIR)$(bindir))'
+	$(INSTALL_PROGRAM) bin/blkid '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/cpuinfo '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/dumper '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
 	$(INSTALL_PROGRAM) bin/execmac '$(call SHESCAPE,$(DESTDIR)$(bindir))/'
@@ -230,6 +235,7 @@ install: all
 # Install and strip executables.
 .PHONY: install-strip
 install-strip: install
+	$(STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/blkid
 	$(STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/cpuinfo
 	$(STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/dumper
 	$(STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/execmac
@@ -255,6 +261,7 @@ install-strip: install
 # Uninstall previously installed files and executables.
 .PHONY: uninstall
 uninstall:
+	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/blkid
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/cpuinfo
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/dumper
 	rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/execmac
