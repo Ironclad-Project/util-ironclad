@@ -26,6 +26,9 @@
 #include <sys/mount.h>
 #include <commons.h>
 #include <errno.h>
+#include <dirent.h>
+#include <sys/ioctl.h>
+#include <fcntl.h>
 
 #define SC_LIST_MOUNTS 9
 struct mountinfo {
@@ -46,7 +49,18 @@ struct mountinfo {
     uint64_t maxfile;
 };
 
-int string_to_type(const char *type) {
+#define DEV_UUID 0x9821
+
+static void uuid_to_string(uuid_t uuid, char *str) {
+    snprintf(str, UUID_STR_LEN + 1,
+           "%8.8x-%4.4x-%4.4x-%2.2x%2.2x-%2.2x%2.2x%2.2x%2.2x%2.2x%2.2x",
+           uuid.time_low, uuid.time_mid, uuid.time_hi_and_version,
+           uuid.clock_seq_hi_and_reserved, uuid.clock_seq_low, uuid.node[0],
+           uuid.node[1], uuid.node[2], uuid.node[3], uuid.node[4],
+           uuid.node[5]);
+}
+
+static int string_to_type(const char *type) {
    if (!strncmp(type, "ext", 3) || !strncmp(type, "ext2", 4) ||
        !strncmp(type, "ext3", 4) || !strncmp(type, "ext4", 4)) {
       return MNT_EXT;
@@ -58,15 +72,16 @@ int string_to_type(const char *type) {
    }
 }
 
-char *type_to_string(int type) {
+static char *type_to_string(int type) {
    switch (type) {
       case MNT_EXT: return "ext";
       case MNT_FAT: return "fat";
+      case MNT_DEV: return "devfs";
       default: return NULL;
    }
 }
 
-int update_mtab(void) {
+static int update_mtab(void) {
     long ret, errno;
     struct mountinfo *buffer = malloc(5 * sizeof(struct mountinfo));
     SYSCALL3(SYSCALL_SYSCONF, SC_LIST_MOUNTS, buffer, 5 * sizeof(struct mountinfo));
@@ -97,7 +112,7 @@ int update_mtab(void) {
     return 0;
 }
 
-int print_kernel_mounts(void) {
+static int print_kernel_mounts(void) {
     long ret, errno;
     struct mountinfo *buffer = malloc(5 * sizeof(struct mountinfo));
     SYSCALL3(SYSCALL_SYSCONF, SC_LIST_MOUNTS, buffer, 5 * sizeof(struct mountinfo));
@@ -108,7 +123,7 @@ int print_kernel_mounts(void) {
     for (int i = 0; i < ret; i++) {
         printf("%.*s ", buffer[i].source_length, buffer[i].source);
         printf("%.*s ", buffer[i].location_length, buffer[i].location);
-        printf("type %s ", type_to_string(buffer[i].type));
+        printf("type %s (", type_to_string(buffer[i].type));
         if (buffer[i].flags & MS_RDONLY) {
             printf("ro");
         } else {
@@ -117,12 +132,45 @@ int print_kernel_mounts(void) {
         if (buffer[i].flags & MS_RELATIME) {
             printf(",relatime");
         }
-        printf("\n");
+        printf(")\n");
     }
     return 0;
 }
 
-int update_according_fstab(void) {
+static char *get_path_from_uuid(const char *searched_uuid) {
+    DIR *folder = opendir("/dev");
+    if (folder == NULL) {
+        return NULL;
+    }
+
+    struct dirent *entry;
+    char path[1025];
+    while ((entry = readdir(folder))) {
+        if (entry->d_name[0] != '.') {
+            strcpy(path, "/dev/");
+            strcat(path, entry->d_name);
+
+            uuid_t uuid;
+            int fd = open(path, O_RDWR);
+            if (fd == -1 || ioctl(fd, DEV_UUID, &uuid)) {
+                return NULL;
+            }
+
+            close(fd);
+
+            char uuid_str[UUID_STR_LEN + 1];
+            uuid_to_string(uuid, uuid_str);
+            if (!strcmp(searched_uuid, uuid_str)) {
+                return strdup(entry->d_name);
+            }
+        }
+    }
+
+    closedir(folder);
+    return NULL;
+}
+
+static int update_according_fstab(void) {
     FILE *fstab = fopen("/etc/fstab", "r");
     if (fstab == NULL) {
         perror("mount: could not open fstab");
@@ -131,14 +179,52 @@ int update_according_fstab(void) {
 
     char buffer[150];
     while (fgets(buffer, 150, fstab) != NULL) {
-        char source[30];
+        char source[60];
         char target[30];
         char fs[30];
+        char options[30];
+        char dump[10];
+        char pass[10];
 
-        if (sscanf(buffer, "%s %s %s\n", source, target, fs) != 3) {
-            break;
+        if (buffer[0] == '#') {
+            continue;
         }
-        mount(source, target, string_to_type(fs), 0);
+
+        if (sscanf(buffer, "%s %s %s %s %s %s\n", source, target, fs, options,
+                   dump, pass) != 6) {
+            if (strlen(buffer) == 1) {
+                continue;
+            } else {
+                break;
+            }
+        }
+
+        int flags = 0;
+        char* token = strtok(options, " , ");
+        while (token != NULL) {
+            if (!strcmp(token, "ro")) {
+                flags |= MS_RDONLY;
+            } else if (!strcmp(token, "relatime")) {
+                flags |= MS_RELATIME;
+            }
+            token = strtok(NULL, " , ");
+        }
+
+        int fs_type = string_to_type(fs);
+
+        // Check whether we got given a UUID instead of a device path.
+        if (!strncmp(source, "UUID=", 5)) {
+            char *device_path = get_path_from_uuid(&source[5]);
+            if (device_path == NULL) {
+                fprintf(stderr, "mount: did not find device %s by UUID\n",
+                        &source[5]);
+            } else {
+                mount(device_path, target, fs_type, flags);
+                free(device_path);
+            }
+        } else {
+            mount(source, target, fs_type, flags);
+        }
     }
 
     fclose(fstab);

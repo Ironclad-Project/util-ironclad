@@ -30,15 +30,6 @@
 
 #define DEV_UUID 0x9821
 
-typedef struct {
-    uint32_t  time_low;
-    uint16_t  time_mid;
-    uint16_t  time_hi_and_version;
-    uint8_t   clock_seq_hi_and_reserved;
-    uint8_t   clock_seq_low;
-    uint8_t   node[6];
-} uuid_t;
-
 static void print_fd_uuid(const char *path) {
     int fd = open(path, O_RDWR);
     if (fd == -1) {
