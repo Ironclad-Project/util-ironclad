@@ -36,8 +36,6 @@ AC_PROG_MKDIR_P
 PROG_ABSPATH([MKDIR_P])
 AC_PROG_INSTALL
 PROG_ABSPATH([INSTALL])
-AC_PROG_LN_S
-PROG_ABSPATH([LN_S])
 
 AC_CHECK_PROG([FIND_FOUND], [find], [yes])
 if ! test "x$FIND_FOUND" = "xyes"; then
@@ -47,7 +45,12 @@ fi
 AC_ARG_VAR([STRIP], [strip command])
 
 if ! test -z "$STRIP"; then
-    AC_CHECK_PROG([STRIP_USER_FOUND], [$STRIP], [yes])
+    if test -x "$STRIP"; then
+        STRIP_USER_FOUND=yes
+    else
+        AC_CHECK_PROG([STRIP_USER_FOUND], [$STRIP], [yes])
+    fi
+
     if ! test "x$STRIP_USER_FOUND" = "xyes"; then
         AC_MSG_ERROR([$STRIP not found, please install $STRIP before configuring])
     fi
@@ -68,6 +71,7 @@ AC_SUBST([STRIP])
 PKGCONF_LIBS_LIST=""
 
 PKG_PROG_PKG_CONFIG
+PROG_ABSPATH([PKG_CONFIG])
 
 for lib in $PKGCONF_LIBS_LIST; do
     set -e
