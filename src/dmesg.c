@@ -1,5 +1,5 @@
 /*
-    klog.c: Display logs.
+    dmesg.c: Display kernel logs.
     Copyright (C) 2023 streaksu
 
     This program is free software: you can redistribute it and/or modify
@@ -30,17 +30,17 @@ int main(int argc, char *argv[]) {
     while ((c = getopt (argc, argv, "hv")) != -1) {
         switch (c) {
             case 'h':
-                puts("Usage: klog [options]");
+                puts("Usage: dmesg [options]");
                 puts("");
                 puts("Options:");
                 puts("-h              Print this help message");
                 puts("-v              Display version information.");
                 return 0;
             case 'v':
-               puts("klog" VERSION_STR);
+               puts("dmesg" VERSION_STR);
                return 0;
             default:
-                fprintf(stderr, "klog: Unknown option '%c'\n", optopt);
+                fprintf(stderr, "dmesg: Unknown option '%c'\n", optopt);
                 return 1;
         }
     }
