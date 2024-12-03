@@ -58,6 +58,9 @@ int main(int argc, char *argv[]) {
                 puts("mac:     Can modify MAC permissions and enforcement");
                 puts("clock:   Can access clock resources");
                 puts("killall: Can kill and signal to all processes");
+                puts("setgid:  Can change process group ID");
+                puts("ipc:     Can manage system IPC resources");
+                puts("syslog:  Can access system logs, like dmesg");
                 puts("all:     Use all capabilities, must be passed alone.");
                 return 0;
             case 'v':
@@ -99,6 +102,12 @@ int main(int argc, char *argv[]) {
                         translated_caps |= MAC_CAP_CLOCK;
                     } else if (!strncmp(capability, "killall", 7)) {
                         translated_caps |= MAC_CAP_SIGNALALL;
+                    } else if (!strncmp(capability, "setgid", 6)) {
+                        translated_caps |= MAC_CAP_SETGID;
+                    } else if (!strncmp(capability, "ipc", 3)) {
+                        translated_caps |= MAC_CAP_IPC;
+                    } else if (!strncmp(capability, "syslog", 6)) {
+                        translated_caps |= MAC_CAP_SYS_LOG;
                     } else {
                         fputs("execmac: bad cap", stderr);
                         return 1;
