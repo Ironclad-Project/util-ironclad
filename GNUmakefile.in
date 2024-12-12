@@ -18,42 +18,36 @@
 MAKEFLAGS += -rR
 .SUFFIXES:
 
-# Convenience macro to reliably declare user overridable variables.
-override USER_VARIABLE = $(if $(filter $(origin $(1)),default undefined),$(eval override $(1) := $(2)))
-
-# Import some autoconf variables as make variables.
-# Those beginning with DEFAULT_ are user overridable.
-override SRCDIR := @SRCDIR@
-override PACKAGE_VERSION := @PACKAGE_VERSION@
-override PACKAGE_TARNAME := @PACKAGE_TARNAME@
-override OUTPUT := bin/$(PACKAGE_TARNAME)
-override WERROR_FLAG := @WERROR_FLAG@
-override DEFAULT_CC := @CC@
-$(call USER_VARIABLE,CC,$(DEFAULT_CC))
-override DEFAULT_CFLAGS := @CFLAGS@
-$(call USER_VARIABLE,CFLAGS,$(DEFAULT_CFLAGS))
-override PKGCONF_CFLAGS := @PKGCONF_CFLAGS@
-override DEFAULT_CPPFLAGS := @CPPFLAGS@
-$(call USER_VARIABLE,CPPFLAGS,$(DEFAULT_CPPFLAGS))
-override PKGCONF_CPPFLAGS := @PKGCONF_CPPFLAGS@
-override DEFAULT_LDFLAGS := @LDFLAGS@
-$(call USER_VARIABLE,LDFLAGS,$(DEFAULT_LDFLAGS))
-override DEFAULT_LIBS := @LIBS@
-$(call USER_VARIABLE,LIBS,$(DEFAULT_LIBS))
-override PKGCONF_LIBS := @PKGCONF_LIBS@
-override STRIP := @STRIP@
-override MKDIR_P := @MKDIR_P@
-override INSTALL := @INSTALL@
-override INSTALL_PROGRAM := @INSTALL_PROGRAM@
-override prefix := @prefix@
-override exec_prefix := @exec_prefix@
-override bindir := @bindir@
-
 # Macros to make our build system still work from within paths with spaces
 # or other special characters.
 override SPACE := $(subst ,, )
 override MKESCAPE = $(subst $(SPACE),\ ,$(1))
 override SHESCAPE = $(subst ','\'',$(1))
+
+# Import some autoconf variables as make variables.
+override SRCDIR := @SRCDIR@
+override PACKAGE_VERSION := @PACKAGE_VERSION@
+override PACKAGE_TARNAME := @PACKAGE_TARNAME@
+override OUTPUT := bin/$(PACKAGE_TARNAME)
+override DIST_OUTPUT := $(PACKAGE_TARNAME)-$(PACKAGE_VERSION)
+override WERROR_FLAG := @WERROR_FLAG@
+override PKGCONF_CFLAGS := @PKGCONF_CFLAGS@
+override PKGCONF_CPPFLAGS := @PKGCONF_CPPFLAGS@
+override PKGCONF_LIBS := @PKGCONF_LIBS@
+
+# Import autoconf variables that we allow the user to override.
+CC := @CC@
+CFLAGS := @CFLAGS@
+CPPFLAGS := @CPPFLAGS@
+LDFLAGS := @LDFLAGS@
+LIBS := @LIBS@
+STRIP := @STRIP@
+MKDIR_P := @MKDIR_P@
+INSTALL := @INSTALL@
+INSTALL_PROGRAM := @INSTALL_PROGRAM@
+prefix := @prefix@
+exec_prefix := @exec_prefix@
+bindir := @bindir@
 
 # Internal C flags that should not be changed by the user.
 override CFLAGS += \
@@ -70,7 +64,7 @@ override CPPFLAGS := \
     $(CPPFLAGS) \
     -DPACKAGE_VERSION=\"$(PACKAGE_VERSION)\"
 
-# Internal library flags that should not be changed by the user.
+# Internal libraries that should not be changed by the user.
 override LIBS += \
     $(PKGCONF_LIBS)
 
@@ -80,94 +74,95 @@ all: bin/blkid bin/cpuinfo bin/dmesg bin/execmac bin/ifconfig bin/ipcrm bin/ipcs
 	bin/lp bin/lslocks bin/mount bin/newgrp bin/ps bin/renice bin/showmem bin/strace \
 	bin/su bin/umount bin/uptime bin/watch bin/dumper
 
-bin/blkid:
+bin/blkid: $(call MKESCAPE,$(SRCDIR))/src/blkid.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/blkid.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
 
-bin/cpuinfo:
+bin/cpuinfo: $(call MKESCAPE,$(SRCDIR))/src/cpuinfo.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/cpuinfo.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
 
-bin/dmesg:
+bin/dmesg: $(call MKESCAPE,$(SRCDIR))/src/dmesg.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/dmesg.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
 
-bin/dumper:
+bin/dumper: $(call MKESCAPE,$(SRCDIR))/src/dumper.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/dumper.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
 
-bin/execmac:
+bin/execmac: $(call MKESCAPE,$(SRCDIR))/src/execmac.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/execmac.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
 
-bin/ifconfig:
+bin/ifconfig: $(call MKESCAPE,$(SRCDIR))/src/ifconfig.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/ifconfig.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
 
-bin/ipcrm:
+bin/ipcrm: $(call MKESCAPE,$(SRCDIR))/src/ipcrm.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/ipcrm.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
 
-bin/ipcs:
+bin/ipcs: $(call MKESCAPE,$(SRCDIR))/src/ipcs.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/ipcs.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
 
-bin/logger:
+bin/logger: $(call MKESCAPE,$(SRCDIR))/src/logger.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/logger.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
 
-bin/login:
+bin/login: $(call MKESCAPE,$(SRCDIR))/src/login.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/login.c' -lgcrypt $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' -lgcrypt $(LIBS) -o $@
 
-bin/lp:
+bin/lp: $(call MKESCAPE,$(SRCDIR))/src/lp.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/lp.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
 
-bin/lslocks:
+bin/lslocks: $(call MKESCAPE,$(SRCDIR))/src/lslocks.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/lslocks.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
 
-bin/mount:
+bin/mount: $(call MKESCAPE,$(SRCDIR))/src/mount.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/mount.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
 
-bin/newgrp:
+bin/newgrp: $(call MKESCAPE,$(SRCDIR))/src/newgrp.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/newgrp.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
 
-bin/ps:
+bin/ps: $(call MKESCAPE,$(SRCDIR))/src/ps.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/ps.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
 
-bin/renice:
+bin/renice: $(call MKESCAPE,$(SRCDIR))/src/renice.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/renice.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
 
-bin/showmem:
+bin/showmem: $(call MKESCAPE,$(SRCDIR))/src/showmem.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/showmem.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
 
-bin/strace:
+bin/strace: $(call MKESCAPE,$(SRCDIR))/src/strace.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/strace.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
 
-bin/su:
+bin/su: $(call MKESCAPE,$(SRCDIR))/src/su.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/su.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
 
-bin/umount:
+bin/umount: $(call MKESCAPE,$(SRCDIR))/src/umount.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/umount.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
 
-bin/uptime:
+bin/uptime: $(call MKESCAPE,$(SRCDIR))/src/uptime.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/uptime.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
 
-bin/watch:
+bin/watch: $(call MKESCAPE,$(SRCDIR))/src/watch.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$(SRCDIR))/src/watch.c' $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
 
+# Remove object files and the final executable.
 .PHONY: clean
 clean:
 	rm -rf bin
@@ -177,30 +172,30 @@ clean:
 distclean: clean
 	rm -rf config.log config.status GNUmakefile
 
-# Create a release tarball.
-.PHONY: dist
-dist:
-	rm -rf "$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)"
-	$(MKDIR_P) "$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)"
-	cp -rp '$(call SHESCAPE,$(SRCDIR))'/.git "$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)"/
-	cd "$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)" && git checkout .
-	cd "$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)" && ./bootstrap
-	rm -rf "$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)"/.git
-	rm -rf "$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)"/.gitignore
-	rm -rf "$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)"/.github
-	rm -rf "$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)"/autom4te.cache
-	echo "$(PACKAGE_VERSION)" >"$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)"/version
-	tar -cf "$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar" "$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)"
-	gzip < "$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar" > "$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.gz"
-	( bzip2 < "$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar" > "$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.bz2" || rm "$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.bz2" )
-	( xz < "$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar" > "$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.xz" || rm "$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.xz" )
-	rm "$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar"
-	rm -rf "$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)"
-
 # Remove ALL generated files.
 .PHONY: maintainer-clean
 maintainer-clean: distclean
 	cd '$(call SHESCAPE,$(SRCDIR))' && rm -rf configure build-aux *'~' autom4te.cache aclocal.m4
+
+# Create a release tarball.
+.PHONY: dist
+dist:
+	rm -rf "$(DIST_OUTPUT)"
+	$(MKDIR_P) "$(DIST_OUTPUT)"
+	cp -rp '$(call SHESCAPE,$(SRCDIR))'/.git "$(DIST_OUTPUT)"/
+	cd "$(DIST_OUTPUT)" && git checkout .
+	cd "$(DIST_OUTPUT)" && ./bootstrap
+	rm -rf "$(DIST_OUTPUT)"/.git
+	rm -rf "$(DIST_OUTPUT)"/.gitignore
+	rm -rf "$(DIST_OUTPUT)"/.github
+	rm -rf "$(DIST_OUTPUT)"/autom4te.cache
+	echo "$(PACKAGE_VERSION)" >"$(DIST_OUTPUT)"/version
+	tar -cf "$(DIST_OUTPUT).tar" "$(DIST_OUTPUT)"
+	gzip < "$(DIST_OUTPUT).tar" > "$(DIST_OUTPUT).tar.gz"
+	( bzip2 < "$(DIST_OUTPUT).tar" > "$(DIST_OUTPUT).tar.bz2" || rm "$(DIST_OUTPUT).tar.bz2" )
+	( xz < "$(DIST_OUTPUT).tar" > "$(DIST_OUTPUT).tar.xz" || rm "$(DIST_OUTPUT).tar.xz" )
+	rm "$(DIST_OUTPUT).tar"
+	rm -rf "$(DIST_OUTPUT)"
 
 # Install files and executables to the final locations.
 .PHONY: install
