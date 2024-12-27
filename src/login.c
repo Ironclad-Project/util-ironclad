@@ -28,6 +28,7 @@
 #include <string.h>
 #include <gcrypt.h>
 #include <termios.h>
+#include <sys/time.h>
 
 static const char *issue_path = "/etc/issue"; // To display before login.
 static const char *motd_path = "/etc/motd";   // To display after login.
@@ -125,6 +126,8 @@ int main(int argc, char *argv[]) {
             struct utmpx entry;
             entry.ut_type = USER_PROCESS;
             strcpy(entry.ut_user, pwd->pw_name);
+            gettimeofday(&entry.ut_tv, NULL);
+
             setutxent();
             if (pututxline(&entry) == NULL) {
                 perror("login: could not log login");
