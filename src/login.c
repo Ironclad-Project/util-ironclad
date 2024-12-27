@@ -134,6 +134,7 @@ int main(int argc, char *argv[]) {
             setuid(pwd->pw_uid);
             setgid(pwd->pw_gid);
             setenv("HOME", pwd->pw_dir, 1);
+            setenv("LOGNAME", pwd->pw_name, 1);
             chdir(pwd->pw_dir);
             execl(pwd->pw_shell, pwd->pw_shell, "--login", NULL);
             return 1;
