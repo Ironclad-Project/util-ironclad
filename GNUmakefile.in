@@ -72,7 +72,7 @@ override LIBS += \
 .PHONY: all
 all: bin/blkid bin/cpuinfo bin/dmesg bin/execmac bin/ifconfig bin/ipcrm bin/ipcs bin/logger bin/login \
 	bin/lp bin/lslocks bin/mount bin/newgrp bin/pivot_root bin/ps bin/renice bin/showmem bin/strace \
-	bin/su bin/umount bin/uptime bin/watch bin/dumper
+	bin/su bin/umount bin/watch bin/dumper
 
 bin/blkid: $(call MKESCAPE,$(SRCDIR))/src/blkid.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
@@ -158,10 +158,6 @@ bin/umount: $(call MKESCAPE,$(SRCDIR))/src/umount.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
 
-bin/uptime: $(call MKESCAPE,$(SRCDIR))/src/uptime.c GNUmakefile
-	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
-
 bin/watch: $(call MKESCAPE,$(SRCDIR))/src/watch.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
@@ -206,7 +202,7 @@ dist:
 install: all
 	$(INSTALL) -d '$(call SHESCAPE,$(DESTDIR)$(bindir))'
 	for f in blkid cpuinfo dumper execmac ifconfig ipcrm ipcs dmesg logger login lp \
-			lslocks mount newgrp pivot_root ps renice showmem strace su umount uptime watch; do \
+			lslocks mount newgrp pivot_root ps renice showmem strace su umount watch; do \
 		$(INSTALL_PROGRAM) bin/$$f '$(call SHESCAPE,$(DESTDIR)$(bindir))/'; \
 	done
 
@@ -214,7 +210,7 @@ install: all
 .PHONY: install-strip
 install-strip: install
 	for f in blkid cpuinfo dumper execmac ifconfig ipcrm ipcs dmesg logger login lp \
-			lslocks mount newgrp pivot_root ps renice showmem strace su umount uptime watch; do \
+			lslocks mount newgrp pivot_root ps renice showmem strace su umount watch; do \
 		$(STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/$$f; \
 	done
 
@@ -222,6 +218,6 @@ install-strip: install
 .PHONY: uninstall
 uninstall:
 	for f in blkid cpuinfo dumper execmac ifconfig ipcrm ipcs dmesg logger login lp \
-			lslocks mount newgrp pivot_root ps renice showmem strace su umount uptime watch; do \
+			lslocks mount newgrp pivot_root ps renice showmem strace su umount watch; do \
 		rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/$$f; \
 	done
