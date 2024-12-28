@@ -25,6 +25,7 @@
 #include <commons.h>
 #include <inttypes.h>
 #include <string.h>
+#include <time.h>
 
 #define SC_LIST_PROCS   8
 #define SC_LIST_THREADS 12
@@ -42,6 +43,7 @@ struct procinfo {
     uint16_t pid;
     uint32_t uid;
     uint32_t flags;
+    struct timespec elapsed;
 } __attribute__((packed));
 
 
@@ -86,6 +88,7 @@ int main(int argc, char *argv[]) {
     int print_only_this = 0;
     int print_only_this_name = 0;
     int print_only_this_parent = 0;
+    int print_only_elapsed_time = 0;
 
     char c;
     while ((c = getopt (argc, argv, "hvATCrp:o:")) != -1) {
@@ -116,10 +119,12 @@ int main(int argc, char *argv[]) {
                 }
                 break;
             case 'o':
-                if (!strncmp(optarg, "comm", 4)) {
+                if (!strncmp(optarg, "comm=", 4)) {
                     print_only_this_name = 1;
-                } else if (!strncmp(optarg, "ppid", 4)) {
+                } else if (!strncmp(optarg, "ppid=", 4)) {
                     print_only_this_parent = 1;
+                } else if (!strncmp(optarg, "etime=", 4)) {
+                    print_only_elapsed_time = 1;
                 }
                 break;
             default:
@@ -189,6 +194,18 @@ int main(int argc, char *argv[]) {
                         printf("%.*s\n", buffer[i].id_len, buffer[i].id);
                     } else if (print_only_this_parent) {
                         printf("%d\n", buffer[i].ppid);
+                    } else if (print_only_elapsed_time) {
+                        uint64_t seconds = buffer[i].elapsed.tv_sec;
+                        uint64_t hours = seconds / 3600;
+                        if (hours != 0) {
+                           seconds %= 3600;
+                        }
+                        uint64_t minutes = seconds / 60;
+                        if (minutes != 0) {
+                           seconds %= 60;
+                        }
+
+                        printf("%02ld:%02ld:%02ld\n", hours, minutes, seconds);
                     } else {
                         print_process_list_header();
                         print_process_list_process(&buffer[i]);
