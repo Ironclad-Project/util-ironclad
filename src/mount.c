@@ -105,6 +105,8 @@ static int update_mtab(void) {
         }
         if (buffer[i].flags & MS_RELATIME) {
             fprintf(mtab, ",relatime");
+        } else if (buffer[i].flags & MS_NOATIME) {
+            fprintf(mtab, ",noatime");
         }
         fprintf(mtab, " 0 0\n");
     }
@@ -206,6 +208,8 @@ static int update_according_fstab(void) {
                 flags |= MS_RDONLY;
             } else if (!strcmp(token, "relatime")) {
                 flags |= MS_RELATIME;
+            } else if (!strcmp(token, "noatime")) {
+                flags |= MS_NOATIME;
             }
             token = strtok(NULL, " , ");
         }
@@ -256,6 +260,7 @@ int main(int argc, char *argv[]) {
                 puts("remount   Instead of mounting, remount <source>");
                 puts("ro        Mount read-only, if not present, read-write");
                 puts("relatime  Use relative timestamps");
+                puts("noatime   Do not keep track of access times");
                 return 0;
             case 'v':
                puts("mount" VERSION_STR);
@@ -278,6 +283,8 @@ int main(int argc, char *argv[]) {
                         flags |= MS_RDONLY;
                     } else if (!strncmp(tok, "relatime", 8)) {
                         flags |= MS_RELATIME;
+                    } else if (!strncmp(tok, "noatime", 8)) {
+                        flags |= MS_NOATIME;
                     } else {
                         fputs("mount: unrecognized flag", stderr);
                         return 1;
