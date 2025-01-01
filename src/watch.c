@@ -31,8 +31,9 @@
 #include <termios.h>
 #include <sys/ioctl.h>
 #include <sys/wait.h>
+#include <sys/syscall.h>
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[], char *envp[]) {
     int stop_on_fail          = 0;
     int do_exec               = 0;
     double seconds_for_update = 2.0;
@@ -81,7 +82,6 @@ int main(int argc, char *argv[]) {
 END_WHILE:
     struct tm *timeinfo;
     time_t rawtime;
-    pid_t child;
     char *timestr;
     struct winsize w;
     size_t headerlen, timelen;
@@ -114,23 +114,27 @@ END_WHILE:
 
         int wstatus;
         if (do_exec) {
-            child = fork();
-            if (child == 0) {
-                execvp(argv[optind], argv + optind);
-                return 69;
+            int ret, errno;
+
+            size_t passed_argc, passed_envc;
+            for (passed_argc = 0; argv[optind + passed_argc]; passed_argc++);
+            for (passed_envc = 0; envp[passed_envc]; passed_envc++);
+
+            size_t len = strlen(argv[optind]);
+            SYSCALL7(SYSCALL_SPAWN, argv[optind], len, argv + optind, passed_argc,
+               (uint64_t)envp, passed_envc, NULL);
+            if (errno) {
+               perror("watch: could not execute");
+               return 1;
             }
-            waitpid(child, &wstatus, 0);
+
+            waitpid(ret, &wstatus, 0);
         } else {
             wstatus = system(cmd_str);
         }
 
-        if (WEXITSTATUS(wstatus) != 0) {
-            if (WEXITSTATUS(wstatus) == 69 && do_exec) {
-                printf("watch: could not execute '%s'\n", cmd_str);
-            }
-            if (stop_on_fail) {
-                goto CLEANUP;
-            }
+        if (WEXITSTATUS(wstatus) != 0 && stop_on_fail) {
+            goto CLEANUP;
         }
 
         struct timespec duration;
