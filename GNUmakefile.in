@@ -71,8 +71,8 @@ override LIBS += \
 # Default target.
 .PHONY: all
 all: bin/blkid bin/cpuinfo bin/dmesg bin/execmac bin/ifconfig bin/ipcrm bin/ipcs bin/logger bin/login \
-	bin/lp bin/lslocks bin/mount bin/newgrp bin/pivot_root bin/ps bin/renice bin/showmem bin/strace \
-	bin/su bin/umount bin/watch bin/dumper
+	bin/lp bin/lsclocks bin/lslocks bin/lspci bin/mount bin/newgrp bin/pivot_root bin/ps bin/renice \
+	bin/showmem bin/strace bin/su bin/umount bin/watch bin/dumper
 
 bin/blkid: $(call MKESCAPE,$(SRCDIR))/src/blkid.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
@@ -118,7 +118,15 @@ bin/lp: $(call MKESCAPE,$(SRCDIR))/src/lp.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
 
+bin/lsclocks: $(call MKESCAPE,$(SRCDIR))/src/lsclocks.c GNUmakefile
+	$(MKDIR_P) "$$(dirname $@)"
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
+
 bin/lslocks: $(call MKESCAPE,$(SRCDIR))/src/lslocks.c GNUmakefile
+	$(MKDIR_P) "$$(dirname $@)"
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
+
+bin/lspci: $(call MKESCAPE,$(SRCDIR))/src/lspci.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' $(LIBS) -o $@
 
@@ -201,23 +209,23 @@ dist:
 .PHONY: install
 install: all
 	$(INSTALL) -d '$(call SHESCAPE,$(DESTDIR)$(bindir))'
-	for f in blkid cpuinfo dumper execmac ifconfig ipcrm ipcs dmesg logger login lp \
-			lslocks mount newgrp pivot_root ps renice showmem strace su umount watch; do \
+	for f in blkid cpuinfo dumper execmac ifconfig ipcrm ipcs dmesg logger login lp lsclocks \
+			lslocks lspci mount newgrp pivot_root ps renice showmem strace su umount watch; do \
 		$(INSTALL_PROGRAM) bin/$$f '$(call SHESCAPE,$(DESTDIR)$(bindir))/'; \
 	done
 
 # Install and strip executables.
 .PHONY: install-strip
 install-strip: install
-	for f in blkid cpuinfo dumper execmac ifconfig ipcrm ipcs dmesg logger login lp \
-			lslocks mount newgrp pivot_root ps renice showmem strace su umount watch; do \
+	for f in blkid cpuinfo dumper execmac ifconfig ipcrm ipcs dmesg logger login lp lsclocks \
+			lslocks lspci mount newgrp pivot_root ps renice showmem strace su umount watch; do \
 		$(STRIP) '$(call SHESCAPE,$(DESTDIR)$(bindir))'/$$f; \
 	done
 
 # Uninstall previously installed files and executables.
 .PHONY: uninstall
 uninstall:
-	for f in blkid cpuinfo dumper execmac ifconfig ipcrm ipcs dmesg logger login lp \
-			lslocks mount newgrp pivot_root ps renice showmem strace su umount watch; do \
+	for f in blkid cpuinfo dumper execmac ifconfig ipcrm ipcs dmesg logger login lp lsclocks \
+			lslocks lspci mount newgrp pivot_root ps renice showmem strace su umount watch; do \
 		rm -f '$(call SHESCAPE,$(DESTDIR)$(bindir))'/$$f; \
 	done
