@@ -95,7 +95,7 @@ static int update_mtab(void) {
         return 1;
     }
     for (int i = 0; i < ret; i++) {
-        fprintf(mtab, "%.*s ", buffer[i].source_length, buffer[i].source);
+        fprintf(mtab, "/dev/%.*s ", buffer[i].source_length, buffer[i].source);
         fprintf(mtab, "%.*s ", buffer[i].location_length, buffer[i].location);
         fprintf(mtab, "%s ", type_to_string(buffer[i].type));
         if (buffer[i].flags & MS_RDONLY) {
