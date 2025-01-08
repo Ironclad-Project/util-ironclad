@@ -118,7 +118,10 @@ int main(int argc, char *argv[]) {
         puts("");
         print_whole_file(motd_path);
 
-        int child = fork();
+        pid_t login_pid = getpid();
+        pid_t     child = fork();
+        char       *tty = ttyname(0);
+
         if (child == -1) {
             perror("login: could not fork");
             return 1;
@@ -127,6 +130,10 @@ int main(int argc, char *argv[]) {
             entry.ut_type = USER_PROCESS;
             strcpy(entry.ut_user, pwd->pw_name);
             gettimeofday(&entry.ut_tv, NULL);
+            entry.ut_pid = login_pid;
+            strcpy(entry.ut_user, pwd->pw_name);
+            strcpy(entry.ut_line, tty);
+            entry.ut_id[0] = '\0';
 
             setutxent();
             if (pututxline(&entry) == NULL) {
