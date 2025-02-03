@@ -26,12 +26,12 @@
 #include <grp.h>
 #include <utmpx.h>
 #include <string.h>
-#include <gcrypt.h>
+#include <crypt.h>
 #include <termios.h>
 #include <sys/time.h>
 
 static const char *issue_path = "/etc/issue"; // To display before login.
-static const char *motd_path = "/etc/motd";   // To display after login.
+static const char *motd_path  = "/etc/motd";   // To display after login.
 
 static void print_whole_file(const char *path) {
     struct stat buf;
@@ -104,12 +104,9 @@ int main(int argc, char *argv[]) {
 
             tcsetattr(STDIN_FILENO, TCSANOW, &save);
 
-            unsigned char requested[64];
-            char stringrequest[64 * 2];
-            gcry_md_hash_buffer(GCRY_MD_SHA512, requested, user, strlen(user));
-            convert(requested, stringrequest, 64);
+            char *requested = crypt(user, "GL");
 
-            if (strncmp(pwd->pw_passwd, stringrequest, 64 * 2)) {
+            if (strcmp(pwd->pw_passwd, requested)) {
                 puts("login: password did not match!");
                 continue;
             }

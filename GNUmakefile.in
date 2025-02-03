@@ -112,7 +112,7 @@ bin/logger: $(call MKESCAPE,$(SRCDIR))/src/logger.c GNUmakefile
 
 bin/login: $(call MKESCAPE,$(SRCDIR))/src/login.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' -lgcrypt $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) '$(call SHESCAPE,$<)' -lcrypt $(LIBS) -o $@
 
 bin/lp: $(call MKESCAPE,$(SRCDIR))/src/lp.c GNUmakefile
 	$(MKDIR_P) "$$(dirname $@)"
