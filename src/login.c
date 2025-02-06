@@ -47,15 +47,6 @@ static void print_whole_file(const char *path) {
     }
 }
 
-static const char * const hextable = "0123456789abcdef";
-static void convert(unsigned char *src, char *out, int len) {
-    while(len--) {
-        *out++ = hextable[*src >> 4];
-        *out++ = hextable[*src & 0x0F];
-        src++;
-    }
-}
-
 #define USER_LEN 64
 
 int main(int argc, char *argv[]) {
