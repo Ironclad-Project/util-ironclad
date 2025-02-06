@@ -67,7 +67,7 @@ struct syscall_info {
     int arg_count;
 };
 
-#define MAX_SYSCALL_IDX 94
+#define MAX_SYSCALL_IDX 101
 static const struct syscall_info syscalls[] = {
     [0] = (struct syscall_info){"exit", 1},
     [1] = (struct syscall_info){"arch_prctl", 2},
@@ -147,8 +147,8 @@ static const struct syscall_info syscalls[] = {
     [76] = (struct syscall_info){"utimes", 5},
     [77] = (struct syscall_info){"create_tcluster", 0},
     [78] = (struct syscall_info){"switch_tcluster", 2},
-    [79] = (struct syscall_info){"actually_kill", 1},
-    [80] = (struct syscall_info){"signalpost", 1},
+    [79] = (struct syscall_info){"sigprocmask", 3},
+    [80] = (struct syscall_info){"sigaction", 3},
     [81] = (struct syscall_info){"sendsignal", 2},
     [82] = (struct syscall_info){"getprio", 2},
     [83] = (struct syscall_info){"setprio", 3},
@@ -162,7 +162,13 @@ static const struct syscall_info syscalls[] = {
     [91] = (struct syscall_info){"shmat", 3},
     [92] = (struct syscall_info){"shmctl", 3},
     [93] = (struct syscall_info){"shmdt", 1},
-    [94] = (struct syscall_info){"shmget", 3}
+    [94] = (struct syscall_info){"shmget", 3},
+    [95] = (struct syscall_info){"getsockopt", 5},
+    [96] = (struct syscall_info){"setsockopt", 5},
+    [97] = (struct syscall_info){"get_thread_name", 3},
+    [99] = (struct syscall_info){"failure_policy", 2},
+    [100] = (struct syscall_info){"create_thread", 5},
+    [101] = (struct syscall_info){"signal_return", 0}
 };
 
 static void print_syscall(FILE *out, struct registers state) {
