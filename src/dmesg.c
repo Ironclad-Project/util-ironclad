@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
     size_t length = 100 * 80;
     char *logs = malloc(length);
     int ret, errno;
-    SYSCALL3(SYSCALL_SYSCONF, SC_DUMPLOGS, logs, length);
+    SYSCALL2(SYSCALL_DUMPLOGS, logs, length);
     if (ret == -1) {
         return 1;
     }

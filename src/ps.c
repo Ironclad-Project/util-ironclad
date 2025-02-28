@@ -137,7 +137,7 @@ int main(int argc, char *argv[]) {
         struct threadinfo *buffer = malloc(50 * sizeof(struct threadinfo));
 
         long ret, errno;
-        SYSCALL3(SYSCALL_SYSCONF, SC_LIST_THREADS, buffer, 50 * sizeof(struct procinfo));
+        SYSCALL2(SYSCALL_LISTTHREADS, buffer, 50);
         if (ret == -1 || ret > 50) {
             return 1;
         }
@@ -158,7 +158,7 @@ int main(int argc, char *argv[]) {
         struct tclusterinfo *buffer = malloc(50 * sizeof(struct tclusterinfo));
 
         long ret, errno;
-        SYSCALL3(SYSCALL_SYSCONF, SC_LIST_CLUSTERS, buffer, 50 * sizeof(struct tclusterinfo));
+        SYSCALL2(SYSCALL_LISTCLUSTERS, buffer, 50);
         if (ret == -1 || ret > 50) {
             return 1;
         }
@@ -182,7 +182,7 @@ int main(int argc, char *argv[]) {
         struct procinfo *buffer = malloc(50 * sizeof(struct procinfo));
 
         long ret, errno;
-        SYSCALL3(SYSCALL_SYSCONF, SC_LIST_PROCS, buffer, 50 * sizeof(struct procinfo));
+        SYSCALL2(SYSCALL_LISTPROCS, buffer, 50);
         if (ret == -1 || ret > 50) {
             return 1;
         }

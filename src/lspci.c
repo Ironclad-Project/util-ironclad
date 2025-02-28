@@ -70,14 +70,14 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    SYSCALL3(SYSCALL_SYSCONF, SC_LIST_PCI, buffer, 20 * sizeof(struct devinfo));
+    SYSCALL2(SYSCALL_LISTPCI, buffer, 20);
     if (ret > 20) {
         buffer = realloc(buffer, ret * sizeof(struct devinfo));
         if (!buffer) {
             perror("lspci: could not allocate buffer");
             return 1;
         }
-        SYSCALL3(SYSCALL_SYSCONF, SC_LIST_PCI, buffer, ret * sizeof(struct devinfo));
+        SYSCALL2(SYSCALL_LISTPCI, buffer, ret);
     }
 
     if (ret == -1) {

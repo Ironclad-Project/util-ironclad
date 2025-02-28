@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
 
         int ret, errno;
         struct flockinfo *buffer = malloc(20 * sizeof(struct flockinfo));
-        SYSCALL3(SYSCALL_SYSCONF, SC_LIST_FILELOCKS, buffer, 20 * sizeof(struct flockinfo));
+        SYSCALL2(SYSCALL_LISTFLOCKS, buffer, 20);
         if (ret == -1) {
             return 1;
         }

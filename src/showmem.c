@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
 
     int ret, errno;
     struct mem_info meminfo;
-    SYSCALL3(SYSCALL_SYSCONF, SC_MEMINFO, &meminfo, 0);
+    SYSCALL1(SYSCALL_MEMINFO, &meminfo);
     if (ret != 0) {
         return 1;
     }

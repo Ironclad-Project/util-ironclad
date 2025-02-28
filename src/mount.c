@@ -84,7 +84,7 @@ static char *type_to_string(int type) {
 static int update_mtab(void) {
     long ret, errno;
     struct mountinfo *buffer = malloc(5 * sizeof(struct mountinfo));
-    SYSCALL3(SYSCALL_SYSCONF, SC_LIST_MOUNTS, buffer, 5 * sizeof(struct mountinfo));
+    SYSCALL2(SYSCALL_LISTMOUNTS, buffer, 5);
     if (ret == -1 || ret > 5) {
         return 1;
     }
@@ -117,7 +117,7 @@ static int update_mtab(void) {
 static int print_kernel_mounts(void) {
     long ret, errno;
     struct mountinfo *buffer = malloc(5 * sizeof(struct mountinfo));
-    SYSCALL3(SYSCALL_SYSCONF, SC_LIST_MOUNTS, buffer, 5 * sizeof(struct mountinfo));
+    SYSCALL2(SYSCALL_LISTMOUNTS, buffer, 5);
     if (ret == -1 || ret > 5) {
         return 1;
     }

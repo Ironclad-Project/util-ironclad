@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
 
     struct netinterface *buffer = malloc(10 * sizeof(struct netinterface));
     long ret, errno;
-    SYSCALL3(SYSCALL_SYSCONF, SC_LIST_NETINTER, buffer, 10 * sizeof(struct netinterface));
+    SYSCALL2(SYSCALL_LISTNETINTER, buffer, 10);
     if (ret == -1) {
         return 1;
     }
