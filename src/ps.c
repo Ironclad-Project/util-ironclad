@@ -27,9 +27,6 @@
 #include <string.h>
 #include <time.h>
 
-#define SC_LIST_PROCS   8
-#define SC_LIST_THREADS 12
-#define SC_LIST_CLUSTERS 13
 #define PROC_IS_TRACED  0b01
 #define PROC_EXITED     0b10
 #define SCHED_RR   0b001

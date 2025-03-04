@@ -23,8 +23,6 @@
 #include <math.h>
 #include <commons.h>
 
-#define SC_DUMPLOGS 15
-
 int main(int argc, char *argv[]) {
     char c;
     while ((c = getopt (argc, argv, "hv")) != -1) {

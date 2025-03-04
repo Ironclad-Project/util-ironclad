@@ -24,7 +24,6 @@
 #include <inttypes.h>
 #include <sys/syscall.h>
 
-#define SC_LIST_FILELOCKS 18
 #define MODE_WRITE 0b1
 
 struct flockinfo {

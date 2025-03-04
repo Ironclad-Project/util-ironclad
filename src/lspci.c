@@ -29,8 +29,6 @@
 #include <fcntl.h>
 #include <inttypes.h>
 
-#define SC_LIST_PCI 21
-
 struct devinfo {
     uint8_t  bus;
     uint8_t  func;

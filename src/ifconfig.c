@@ -28,7 +28,6 @@
 #include <stdbool.h>
 #include <fcntl.h>
 
-#define SC_LIST_NETINTER 14
 #define NETINTER_BLOCKED 0b1
 
 struct netinterface {

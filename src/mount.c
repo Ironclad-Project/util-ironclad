@@ -30,7 +30,6 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 
-#define SC_LIST_MOUNTS 9
 struct mountinfo {
     uint32_t type;
     uint32_t flags;

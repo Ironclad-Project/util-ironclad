@@ -23,8 +23,6 @@
 #include <math.h>
 #include <commons.h>
 
-#define SC_MEMINFO 20
-
 struct mem_info {
     // All data is in bytes.
     uint64_t phys_total;     // Total physical memory of the system.
