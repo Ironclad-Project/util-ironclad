@@ -31,6 +31,16 @@
    #include <cpuid.h>
 #endif
 
+struct cpuinfo {
+    uint64_t conf_cores;
+    uint64_t onln_cores;
+    char model_name[64];
+    char vendor_name[64];
+    uint32_t base_mhz;
+    uint32_t max_mhz;
+    uint32_t ref_mhz;
+};
+
 int main(int argc, char *argv[]) {
     bool only_name  = false;
     bool only_cores = false;
@@ -61,36 +71,19 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    // Fetch name.
-    char name[48];
-    #if defined(__x86_64__)
-        __cpuid(0x80000002, *(uint32_t *)(name +  0), *(uint32_t *)(name +  4), *(uint32_t *)(name +  8), *(uint32_t *)(name + 12));
-        __cpuid(0x80000003, *(uint32_t *)(name + 16), *(uint32_t *)(name + 20), *(uint32_t *)(name + 24), *(uint32_t *)(name + 28));
-        __cpuid(0x80000004, *(uint32_t *)(name + 32), *(uint32_t *)(name + 36), *(uint32_t *)(name + 40), *(uint32_t *)(name + 44));
-    #elif defined(__riscv) && __riscv_xlen == 64
-        strcpy(name, "generic riscv64 cpu");
-    #else
-        #error Architecture not supported!
-    #endif
-
-    // Fetch vendor name.
-    char vendor[12];
-    #if defined(__x86_64__)
-        uint32_t throwaway = 0;
-        __cpuid(0x0, throwaway, *(uint32_t *)(&vendor[0] +  0), *(uint32_t *)(&vendor[0] +  8), *(uint32_t *)(&vendor[0] +  4));
-    #elif defined(__riscv) && __riscv_xlen == 64
-        strcpy(vendor, "GenuineRISCV");
-    #else
-        #error Architecture not supported!
-    #endif
-
-    // Fetch core count.
-    uint32_t logical_cores = sysconf(_SC_NPROCESSORS_ONLN);
+    // Fetch CPU information by using getcpuinfo.
+    struct cpuinfo cpu;
+    int ret, errno;
+    SYSCALL1(SYSCALL_GETCPUINFO, &cpu);
+    if (ret == -1) {
+        perror("Could not get CPU information from the kernel");
+        return 1;
+    }
 
     // Fetch base frequency in GHz.
-    double base_frequency = 0;
-    double max_frequency = 0;
-    double reference_frequency = 0;
+    double base_frequency = ((double)cpu.base_mhz) / 1000;
+    double max_frequency = ((double)cpu.max_mhz) / 1000;
+    double reference_frequency = ((double)cpu.ref_mhz) / 1000;
 
     #if defined(__x86_64__)
         uint32_t eax, ebx, ecx, edx;
@@ -102,17 +95,17 @@ int main(int argc, char *argv[]) {
     #endif
 
     if (only_name) {
-        printf("%.*s\n", 48, name);
+        printf("%.*s\n", (int)strnlen(cpu.model_name, 64), cpu.model_name);
     } else if (only_cores) {
-       printf("%d\n", logical_cores);
+       printf("%ld\n", cpu.conf_cores);
     } else if (only_freq) {
        printf("%f GHz\n", base_frequency);
     } else {
-        printf("Vendor ID:          %.*s\n", 12, vendor);
-        printf("Model name:         %.*s\n", 48, name);
+        printf("Vendor ID:          %.*s\n", (int)strnlen(cpu.vendor_name, 64), cpu.vendor_name);
+        printf("Model name:         %.*s\n", (int)strnlen(cpu.model_name, 64), cpu.model_name);
         printf("CPU Base Freq:      %f GHz\n", base_frequency);
         printf("CPU Max Freq:       %f GHz\n", max_frequency);
         printf("CPU Reference Freq: %f GHz\n", reference_frequency);
-        printf("Cores per socket:   %d\n", logical_cores);
+        printf("Cores per socket:   %ld\n", cpu.conf_cores);
     }
 }
